@@ -39,6 +39,9 @@ Thumbs.db
 /next
 /track-hub@0.1.0
 
+# Large / non-ASCII screenshots (can cause HTTP 400 on push)
+ui-screenshots/admin/*.png
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
