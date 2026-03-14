@@ -1,0 +1,31 @@
+{
+  "name": "track-hub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "dev:turbo": "next dev --hostname 127.0.0.1 --turbopack",
+    "dev:kill": "lsof -ti :3000 | xargs kill -9 2>/dev/null; lsof -ti :3002 | xargs kill -9 2>/dev/null; rm -f .next/dev/lock 2>/dev/null; echo 'Port 3000/3002 freed, lock removed.'",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "vercel --prod",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "lucide-react": "^0.577.0",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.8.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
