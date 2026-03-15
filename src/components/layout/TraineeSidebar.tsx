@@ -66,7 +66,7 @@ export function TraineeSidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-lg font-black text-white">
           T
         </div>
-        <span className="font-semibold text-white">Track Demo</span>
+        <span className="font-semibold text-white">Track e-learning</span>
       </div>
 
       <nav className="space-y-1 px-3 py-4">

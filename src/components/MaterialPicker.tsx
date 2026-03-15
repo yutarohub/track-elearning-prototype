@@ -32,7 +32,7 @@ type LanguageFilter = "日本語" | "英語" | null;
 
 export type PickedMaterial = { type: LibraryMaterialCategory | "course" | "learningpath"; id: number; label: string };
 
-const CM_BASE_URL = "https://cm.tracks.run";
+const TCM_BASE_URL = "https://tcm.tracks.run";
 
 function Badge({ kind }: { kind: string }) {
   const style =
@@ -280,12 +280,12 @@ export function MaterialPicker({ selected, onSelectionChange, maxSelection = 0, 
 
       {!courseOnly && (
         <a
-          href={`${CM_BASE_URL}/library/${tab}`}
+          href={`${TCM_BASE_URL}/library/${tab}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline"
         >
-          CMを開く <ExternalLink className="h-4 w-4" />
+          TCMを開く <ExternalLink className="h-4 w-4" />
         </a>
       )}
     </div>

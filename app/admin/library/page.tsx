@@ -67,7 +67,7 @@ const FILTER_CHIPS: { id: PublishFilter; label: string }[] = [
   { id: "live", label: "ライブイベント用" },
 ];
 
-const CM_BASE_URL = "https://cm.tracks.run"; // モック: CMのベースURL
+const TCM_BASE_URL = "https://tcm.tracks.run"; // モック: TCMのベースURL
 
 function Badge({ kind }: { kind: string }) {
   const style =
@@ -237,12 +237,12 @@ export default function LibraryPage() {
               )}
               {!isUploadCategory && !isCourseCategory && (
                 <a
-                  href={`${CM_BASE_URL}/library/${tab}`}
+                  href={`${TCM_BASE_URL}/library/${tab}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
-                  CMで作成・編集
+                  TCMで作成・編集
                   <ExternalLink className="h-4 w-4" />
                 </a>
               )}
