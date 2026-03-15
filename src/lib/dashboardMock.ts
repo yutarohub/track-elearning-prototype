@@ -14,10 +14,36 @@ export interface CourseRow {
   learners: { name: string; progress: number; lastLogin: string }[];
 }
 
-/** Zone 1: MAU */
+/** Zone 1: MAU（単一値は直近月の参照用） */
 export const MOCK_PLATFORM_MAU = 1248;
 export const MOCK_TRACK_OFFICIAL_MAU = 312;
 export const MOCK_TRACK_MAU_PLAN_LIMIT = 500;
+
+/** 月別 MAU 時系列（過去12ヶ月・グラフ・月フィルター用） */
+export interface MauByMonth {
+  yearMonth: string; // "2025-04"
+  label: string;     // "2025年4月"
+  platform: number;
+  trackOfficial: number;
+}
+
+function buildMauByMonth(): MauByMonth[] {
+  const now = new Date();
+  const list: MauByMonth[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+    // 直近月は既存モック値、それ以外はやや少なめのトレンド
+    const isCurrent = i === 0;
+    const platform = isCurrent ? MOCK_PLATFORM_MAU : Math.round(1248 - (11 - i) * 42 + (11 - i) * (11 - i) * 2);
+    const trackOfficial = isCurrent ? MOCK_TRACK_OFFICIAL_MAU : Math.round(312 - (11 - i) * 12 + (11 - i) * 1.5);
+    list.push({ yearMonth, label, platform: Math.max(200, platform), trackOfficial: Math.max(80, trackOfficial) });
+  }
+  return list;
+}
+
+export const MOCK_MAU_BY_MONTH: MauByMonth[] = buildMauByMonth();
 
 /** Zone 1: AI インサイト（LXP リッチ版・変動する情報） */
 export type InsightType = "trend" | "peak" | "completion" | "risk" | "action";

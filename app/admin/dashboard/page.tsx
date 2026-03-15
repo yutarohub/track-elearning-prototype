@@ -10,13 +10,14 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  AreaChart,
+  Area,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import {
   MOCK_AI_INSIGHTS,
-  MOCK_PLATFORM_MAU,
-  MOCK_TRACK_OFFICIAL_MAU,
   MOCK_TRACK_MAU_PLAN_LIMIT,
+  MOCK_MAU_BY_MONTH,
   MOCK_COHORT_RETENTION,
   MOCK_COURSE_STACK,
   type AIInsightItem,
@@ -24,7 +25,7 @@ import {
 import { MOCK_COURSES } from "@/lib/mockData";
 import type { Course, CourseType, Difficulty } from "@/lib/mockData";
 import { ProgressIndicator } from "@/components/dashboard/ProgressIndicator";
-import { X, TrendingUp, Clock, Award, AlertCircle, Sparkles, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, TrendingUp, Clock, Award, AlertCircle, Sparkles, Search, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const INSIGHT_ICONS: Record<AIInsightItem["type"], React.ComponentType<{ className?: string }>> = {
   trend: TrendingUp,
@@ -135,12 +136,19 @@ function TypeBadge({ type }: { type: CourseType }) {
   );
 }
 
+type MauTab = "platform" | "track";
+
 export default function DashboardPage() {
   const [drawerCourse, setDrawerCourse] = useState<Course | null>(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | CourseType>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<"all" | Difficulty>("all");
   const [page, setPage] = useState(1);
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [mauTab, setMauTab] = useState<MauTab>("platform");
 
   const filtered = useMemo(() => {
     let list = MOCK_COURSES;
@@ -163,8 +171,11 @@ export default function DashboardPage() {
     [filtered, page]
   );
 
+  const currentMonthData = MOCK_MAU_BY_MONTH.find((m) => m.yearMonth === selectedMonth);
+  const platformMau = currentMonthData?.platform ?? 0;
+  const trackOfficialMau = currentMonthData?.trackOfficial ?? 0;
   const trackMauPercent = Math.round(
-    (MOCK_TRACK_OFFICIAL_MAU / MOCK_TRACK_MAU_PLAN_LIMIT) * 100
+    (trackOfficialMau / MOCK_TRACK_MAU_PLAN_LIMIT) * 100
   );
 
   return (
@@ -194,40 +205,118 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                プラットフォーム全体 MAU
-              </p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">
-                {MOCK_PLATFORM_MAU.toLocaleString()}
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                自社＋公式の合算 · 組織全体の学習熱量
-              </p>
-            </div>
-            <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Track公式コンテンツ MAU（課金対象）
-              </p>
-              <p className="mt-1 text-[10px] text-amber-600">
-                ※従量課金対象
-              </p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">
-                {MOCK_TRACK_OFFICIAL_MAU}
-                <span className="ml-2 text-lg font-normal text-slate-500">
-                  / {MOCK_TRACK_MAU_PLAN_LIMIT}
-                </span>
-              </p>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
-                  style={{ width: `${Math.min(trackMauPercent, 100)}%` }}
-                />
+          <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex rounded-lg border border-slate-200 bg-slate-50/80 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setMauTab("platform")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                      mauTab === "platform" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    プラットフォーム全体（合算）
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMauTab("track")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                      mauTab === "track" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Track公式（課金対象）
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-slate-400" aria-hidden />
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    aria-label="表示する月を選択"
+                  >
+                    {MOCK_MAU_BY_MONTH.map((m) => (
+                      <option key={m.yearMonth} value={m.yearMonth}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <p className="mt-1 text-sm text-slate-600">
-                プラン上限の {trackMauPercent}%
-              </p>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-2">
+                {mauTab === "platform" ? (
+                  <>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      プラットフォーム全体 MAU
+                    </p>
+                    <p className="mt-2 text-3xl font-bold text-slate-900">
+                      {platformMau.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      自社＋公式の合算 · 組織全体の学習熱量
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Track公式コンテンツ MAU（課金対象）
+                    </p>
+                    <p className="mt-1 text-[10px] text-amber-600">※従量課金対象</p>
+                    <p className="mt-2 text-3xl font-bold text-slate-900">
+                      {trackOfficialMau}
+                      <span className="ml-2 text-lg font-normal text-slate-500">
+                        / {MOCK_TRACK_MAU_PLAN_LIMIT}
+                      </span>
+                    </p>
+                    <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
+                        style={{ width: `${Math.min(trackMauPercent, 100)}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-sm text-slate-600">プラン上限の {trackMauPercent}%</p>
+                  </>
+                )}
+              </div>
+              <div className="h-64 lg:col-span-3">
+                <p className="mb-2 text-xs font-medium text-slate-500">月別推移（直近12ヶ月）</p>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={MOCK_MAU_BY_MONTH.map((m) => ({
+                      ...m,
+                      name: m.label,
+                      value: mauTab === "platform" ? m.platform : m.trackOfficial,
+                    }))}
+                    margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 10 }}
+                      stroke="#64748b"
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis tick={{ fontSize: 11 }} stroke="#64748b" tickFormatter={(v) => v.toLocaleString()} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                      formatter={(value: number) => [value.toLocaleString(), mauTab === "platform" ? "プラットフォームMAU" : "Track公式MAU"]}
+                      labelFormatter={(label) => label}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke={mauTab === "platform" ? "#3b82f6" : "#8b5cf6"}
+                      fill={mauTab === "platform" ? "#3b82f6" : "#8b5cf6"}
+                      fillOpacity={0.35}
+                      name={mauTab === "platform" ? "プラットフォーム全体" : "Track公式"}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </section>
