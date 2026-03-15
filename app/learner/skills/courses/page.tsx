@@ -5,15 +5,96 @@ import {
   MOCK_TRAINEE_COURSES,
   courseThumbnailUrl,
   type TraineeCourse,
-  type TraineeCourseDelivery,
+  type DssQuadrant,
 } from "@/lib/traineeCoursesMock";
-import { Search, Filter, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import {
+  Search,
+  ChevronRight,
+  ExternalLink,
+  Target,
+  Diamond,
+  Zap,
+  Brain,
+  PieChart,
+  Shield,
+  Cloud,
+  FolderKanban,
+  Lightbulb,
+  PencilRuler,
+  Gauge,
+  User,
+  BookOpen,
+  Video,
+  X,
+  Radio,
+  CalendarClock,
+} from "lucide-react";
 
-const PER_PAGE = 20;
-const DELIVERY_LABEL: Record<TraineeCourseDelivery, string> = {
-  self: "自学習用",
-  live: "ライブイベント",
+const DSS_PANEL: {
+  quadrant: DssQuadrant;
+  title: string;
+  items: { id: string; label: string; icon: React.ReactNode }[];
+}[] = [
+  {
+    quadrant: "why",
+    title: "Why（DXの背景）",
+    items: [
+      { id: "dx", label: "DXの実現", icon: <Target className="h-5 w-5" /> },
+      { id: "business", label: "ビジネス変革", icon: <Diamond className="h-5 w-5" /> },
+      { id: "strategy", label: "戦略・組織", icon: <Zap className="h-5 w-5" /> },
+    ],
+  },
+  {
+    quadrant: "what",
+    title: "What（データ・技術）",
+    items: [
+      { id: "ai", label: "AI", icon: <Brain className="h-5 w-5" /> },
+      { id: "data", label: "データ分析", icon: <PieChart className="h-5 w-5" /> },
+      { id: "security", label: "サイバーセキュリティ", icon: <Shield className="h-5 w-5" /> },
+      { id: "cloud", label: "クラウド", icon: <Cloud className="h-5 w-5" /> },
+    ],
+  },
+  {
+    quadrant: "how",
+    title: "How（データ・技術の利活用）",
+    items: [
+      { id: "efficiency", label: "業務効率化", icon: <FolderKanban className="h-5 w-5" /> },
+      { id: "newbusiness", label: "新規事業開発", icon: <Lightbulb className="h-5 w-5" /> },
+      { id: "design", label: "デザイン思考", icon: <PencilRuler className="h-5 w-5" /> },
+    ],
+  },
+  {
+    quadrant: "mindset",
+    title: "Mindset（マインド・スタンス）",
+    items: [
+      { id: "agile", label: "アジャイル", icon: <Gauge className="h-5 w-5" /> },
+      { id: "ownership", label: "オーナーシップ", icon: <User className="h-5 w-5" /> },
+      { id: "learning", label: "継続的学習", icon: <BookOpen className="h-5 w-5" /> },
+    ],
+  },
+];
+
+const QUADRANT_LABELS: Record<DssQuadrant, string> = {
+  why: "Why（DXの背景）",
+  what: "What（データ・技術）",
+  how: "How（データ・技術の利活用）",
+  mindset: "Mindset（マインド・スタンス）",
 };
+
+function formatLiveAt(iso: string) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("ja-JP", {
+      month: "long",
+      day: "numeric",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
 
 function CourseCard({
   course,
@@ -23,14 +104,32 @@ function CourseCard({
   onOpen: (course: TraineeCourse) => void;
 }) {
   const thumb = courseThumbnailUrl(course);
+  const isLive = course.delivery === "live";
+
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+    <div
+      className={`overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md ${
+        isLive
+          ? "border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white"
+          : "border-slate-200 bg-white"
+      }`}
+    >
       <div className="relative h-40 w-full bg-slate-100">
         <img src={thumb} alt="" className="h-full w-full object-cover" />
         <div className="absolute left-2 top-2 flex flex-wrap gap-1">
-          {course.delivery === "live" && (
-            <span className="rounded bg-emerald-600 px-2 py-0.5 text-[10px] font-medium text-white">
-              ライブイベント
+          {isLive && (
+            <span className="flex items-center gap-1 rounded bg-emerald-600 px-2 py-0.5 text-[10px] font-medium text-white">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+              </span>
+              Live
+            </span>
+          )}
+          {!isLive && (
+            <span className="flex items-center gap-1 rounded bg-slate-600 px-2 py-0.5 text-[10px] font-medium text-white">
+              <Video className="h-3 w-3" />
+              eラーニング
             </span>
           )}
           {course.paid && (
@@ -42,6 +141,11 @@ function CourseCard({
             {course.difficulty}
           </span>
         </div>
+        {isLive && course.liveAt && (
+          <div className="absolute bottom-2 left-2 right-2 rounded bg-black/60 px-2 py-1 text-[10px] text-white">
+            {formatLiveAt(course.liveAt)}
+          </div>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-slate-900">{course.title}</h3>
@@ -50,14 +154,22 @@ function CourseCard({
         )}
         <p className="mt-2 text-xs text-slate-500">{course.duration}</p>
         <div className="mt-2 flex flex-wrap gap-1">
-          {course.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600"
-            >
-              {tag}
+          {course.dssLabel && (
+            <span className="rounded bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+              {course.dssLabel}
             </span>
-          ))}
+          )}
+          {course.tags
+            .filter((t) => t !== "ライブイベント" && t !== "有償")
+            .slice(0, 2)
+            .map((tag) => (
+              <span
+                key={tag}
+                className="rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600"
+              >
+                {tag}
+              </span>
+            ))}
         </div>
         <button
           type="button"
@@ -92,24 +204,23 @@ function CourseCardCarousel({
 
 export default function LearnerSkillsCoursesPage() {
   const [search, setSearch] = useState("");
-  const [filterDelivery, setFilterDelivery] = useState<"all" | TraineeCourseDelivery>("all");
-  const [page, setPage] = useState(1);
+  const [selectedQuadrant, setSelectedQuadrant] = useState<DssQuadrant | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const recommended = useMemo(
     () => MOCK_TRAINEE_COURSES.filter((c) => c.recommended),
     []
   );
-  const selfStudy = useMemo(
-    () => MOCK_TRAINEE_COURSES.filter((c) => c.delivery === "self"),
-    []
-  );
   const liveEvents = useMemo(
     () => MOCK_TRAINEE_COURSES.filter((c) => c.delivery === "live"),
     []
   );
+  const selfStudy = useMemo(
+    () => MOCK_TRAINEE_COURSES.filter((c) => c.delivery === "self"),
+    []
+  );
 
-  const allFiltered = useMemo(() => {
+  const filteredBySearchAndQuadrant = useMemo(() => {
     let list = MOCK_TRAINEE_COURSES;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -118,199 +229,272 @@ export default function LearnerSkillsCoursesPage() {
           c.title.toLowerCase().includes(q) ||
           c.subtitle?.toLowerCase().includes(q) ||
           c.category.toLowerCase().includes(q) ||
+          c.dssLabel?.toLowerCase().includes(q) ||
           c.tags.some((t) => t.toLowerCase().includes(q))
       );
     }
-    if (filterDelivery !== "all") {
-      list = list.filter((c) => c.delivery === filterDelivery);
+    if (selectedQuadrant) {
+      list = list.filter((c) => c.dssQuadrant === selectedQuadrant);
     }
     return list;
-  }, [search, filterDelivery]);
+  }, [search, selectedQuadrant]);
 
-  const totalPages = Math.ceil(allFiltered.length / PER_PAGE) || 1;
-  const paginated = useMemo(
-    () => allFiltered.slice((page - 1) * PER_PAGE, page * PER_PAGE),
-    [allFiltered, page]
-  );
+  const coursesByQuadrant = useMemo(() => {
+    const map: Record<DssQuadrant, TraineeCourse[]> = {
+      why: [],
+      what: [],
+      how: [],
+      mindset: [],
+    };
+    MOCK_TRAINEE_COURSES.forEach((c) => {
+      if (c.dssQuadrant && map[c.dssQuadrant]) {
+        map[c.dssQuadrant].push(c);
+      }
+    });
+    return map;
+  }, []);
 
   function handleOpenCourse(course: TraineeCourse) {
     setToast(`「${course.title}」の学習画面は準備中です`);
     setTimeout(() => setToast(null), 3000);
   }
 
+  function scrollToSection(id: string) {
+    const el = document.getElementById(id);
+    el?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  const isEmpty = filteredBySearchAndQuadrant.length === 0;
+  const hasActiveFilter = search.trim() !== "" || selectedQuadrant !== null;
+
   return (
-    <div className="space-y-8">
-      {/* パンくず */}
-      <nav className="text-sm text-slate-500" aria-label="パンくず">
-        スキル習得 / コース
-      </nav>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+        {/* パンくず */}
+        <nav className="text-sm text-slate-500" aria-label="パンくず">
+          スキル習得 / コース
+        </nav>
 
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">コース</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          特定のテーマやスキルを集中して学べる講座です。興味のあるコースを選んで、スキルアップを始めましょう。
-        </p>
-      </div>
-
-      {/* 検索・フィルタ */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            type="search"
-            placeholder="タイトルまたはキーワードで検索"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            aria-label="検索"
-          />
-        </div>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-          aria-label="フィルタ"
-        >
-          <Filter className="h-4 w-4" />
-          フィルタ
-        </button>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-          aria-label="並び替え"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <ChevronRight className="h-4 w-4" />
-          並び替え
-        </button>
-      </div>
-
-      {/* おすすめ */}
-      {recommended.length > 0 && (
-        <section>
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">おすすめ</h2>
-          <CourseCardCarousel courses={recommended} onOpen={handleOpenCourse} />
-        </section>
-      )}
-
-      {/* 自学習用 */}
-      {selfStudy.length > 0 && (
-        <section>
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">自学習用</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {selfStudy.slice(0, 8).map((course) => (
-              <CourseCard key={course.id} course={course} onOpen={handleOpenCourse} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ライブイベント */}
-      {liveEvents.length > 0 && (
-        <section>
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">ライブイベント</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {liveEvents.map((course) => (
-              <CourseCard key={course.id} course={course} onOpen={handleOpenCourse} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 全コース */}
-      <section>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">全コース</h2>
-        <div className="mb-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setFilterDelivery("all")}
-            className={`rounded-lg px-3 py-1.5 text-sm ${
-              filterDelivery === "all"
-                ? "bg-indigo-600 text-white"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
-            すべて
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilterDelivery("self")}
-            className={`rounded-lg px-3 py-1.5 text-sm ${
-              filterDelivery === "self"
-                ? "bg-indigo-600 text-white"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
-            自学習用
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilterDelivery("live")}
-            className={`rounded-lg px-3 py-1.5 text-sm ${
-              filterDelivery === "live"
-                ? "bg-indigo-600 text-white"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
-            ライブイベント
-          </button>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {paginated.map((course) => (
-            <CourseCard key={course.id} course={course} onOpen={handleOpenCourse} />
-          ))}
-        </div>
-        <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4">
-          <p className="text-sm text-slate-500">
-            表示 {(page - 1) * PER_PAGE + 1}-{Math.min(page * PER_PAGE, allFiltered.length)} / {allFiltered.length}
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">コース</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            特定のテーマやスキルを集中して学べる講座です。DSSカテゴリから「なぜ学ぶか」「何を学ぶか」「どう活用するか」で探せます。
           </p>
-          <div className="flex items-center gap-2">
-            <select
-              value={PER_PAGE}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700"
-              aria-label="1ページあたりの件数"
-            >
-              <option value={20}>20件</option>
-              <option value={40}>40件</option>
-            </select>
-            <div className="flex items-center gap-1">
+        </div>
+
+        {/* 1. Global Search & Filter */}
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[200px] flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                placeholder="タイトルまたはキーワードで検索"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                aria-label="検索"
+              />
+            </div>
+            {hasActiveFilter && (
               <button
                 type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-                aria-label="前のページ"
+                onClick={() => {
+                  setSearch("");
+                  setSelectedQuadrant(null);
+                }}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <X className="h-4 w-4" />
+                検索をリセット
               </button>
-              <span className="px-2 text-sm text-slate-700">
-                {page} / {totalPages}
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(["why", "what", "how", "mindset"] as const).map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => setSelectedQuadrant(selectedQuadrant === q ? null : q)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  selectedQuadrant === q
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+                }`}
+              >
+                {QUADRANT_LABELS[q]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* 2. Featured Selection */}
+        {recommended.length > 0 && !hasActiveFilter && (
+          <section>
+            <h2 className="mb-4 text-lg font-semibold text-slate-900">おすすめ</h2>
+            <CourseCardCarousel courses={recommended} onOpen={handleOpenCourse} />
+          </section>
+        )}
+
+        {/* 2b. ライブイベント（おすすめの直下・申請期間を強調） */}
+        {liveEvents.length > 0 && !hasActiveFilter && (
+          <section className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-md">
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <h2 className="flex items-center gap-2 text-xl font-bold text-slate-900">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white">
+                  <Radio className="h-4 w-4" />
+                </span>
+                ライブイベント
+              </h2>
+              <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
+                <CalendarClock className="h-4 w-4" />
+                申請期間あり — お早めにお申し込みください
               </span>
+            </div>
+            <p className="mb-4 text-sm text-slate-600">
+              開催日時が決まったライブ講座です。定員があるため、申込期間内にお申し込みください。
+            </p>
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {liveEvents.map((course) => (
+                <div key={course.id} className="w-72 shrink-0">
+                  <CourseCard course={course} onOpen={handleOpenCourse} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 3. Browse by DSS Categories (マナビDXスタイル) */}
+        {!hasActiveFilter && (
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-center text-base font-semibold text-slate-800">
+              Q カテゴリから「あなたにぴったりな講座」を見つけよう!
+            </h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {DSS_PANEL.map((block) => (
+                <div key={block.quadrant}>
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {block.title}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {block.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedQuadrant(block.quadrant);
+                          scrollToSection("all-courses");
+                        }}
+                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-left text-sm text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-800"
+                      >
+                        <span className="text-slate-500">{item.icon}</span>
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 4. Learning Context Sections (Why / What / How / Mindset) */}
+        {!hasActiveFilter &&
+          (["why", "what", "how", "mindset"] as const).map((quadrant) => {
+            const list = coursesByQuadrant[quadrant];
+            if (list.length === 0) return null;
+            return (
+              <section key={quadrant} id={`section-${quadrant}`}>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    {QUADRANT_LABELS[quadrant]} が学べる人気の講座
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedQuadrant(quadrant);
+                      scrollToSection("all-courses");
+                    }}
+                    className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                  >
+                    すべて見る
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {list.slice(0, 5).map((course) => (
+                    <div key={course.id} className="w-72 shrink-0">
+                      <CourseCard course={course} onOpen={handleOpenCourse} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+
+        {/* 5. All Courses / Live Events（フィルタ結果 or 全体） */}
+        <section id="all-courses">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">
+            {selectedQuadrant ? `${QUADRANT_LABELS[selectedQuadrant]} — 一覧` : "すべてのコース"}
+          </h2>
+
+          {isEmpty ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-12 text-center">
+              <p className="text-slate-600">
+                該当するコースが見つかりませんでした。キーワードを変えてお試しください。
+              </p>
               <button
                 type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-                aria-label="次のページ"
+                onClick={() => {
+                  setSearch("");
+                  setSelectedQuadrant(null);
+                }}
+                className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
               >
-                <ChevronRight className="h-4 w-4" />
+                検索をリセット
               </button>
             </div>
-          </div>
-        </div>
-      </section>
+          ) : (
+            <>
+              {/* フィルタ時のみここにライブを表示（通常時は上部の目立つブロックで表示済み） */}
+              {hasActiveFilter &&
+                filteredBySearchAndQuadrant.some((c) => c.delivery === "live") && (
+                  <div className="mb-6">
+                    <h3 className="mb-3 text-sm font-semibold text-slate-700">ライブイベント</h3>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      {filteredBySearchAndQuadrant
+                        .filter((c) => c.delivery === "live")
+                        .map((course) => (
+                          <CourseCard key={course.id} course={course} onOpen={handleOpenCourse} />
+                        ))}
+                    </div>
+                  </div>
+                )}
+              {filteredBySearchAndQuadrant.some((c) => c.delivery === "self") && (
+                <div>
+                  <h3 className="mb-3 text-sm font-semibold text-slate-700">eラーニングコース</h3>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {filteredBySearchAndQuadrant
+                      .filter((c) => c.delivery === "self")
+                      .map((course) => (
+                        <CourseCard key={course.id} course={course} onOpen={handleOpenCourse} />
+                      ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </section>
 
-      {/* トースト */}
-      {toast && (
-        <div
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-800 px-6 py-3 text-sm text-white shadow-lg animate-[fade-in_0.2s_ease-out]"
-          role="status"
-        >
-          {toast}
-        </div>
-      )}
+        {toast && (
+          <div
+            className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-800 px-6 py-3 text-sm text-white shadow-lg"
+            role="status"
+          >
+            {toast}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

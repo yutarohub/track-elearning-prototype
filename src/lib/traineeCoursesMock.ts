@@ -5,6 +5,9 @@
 export type TraineeCourseDelivery = "self" | "live";
 export type TraineeDifficulty = "入門" | "初級" | "中級" | "上級";
 
+/** DSS（デジタルスキル標準）の4象限 */
+export type DssQuadrant = "why" | "what" | "how" | "mindset";
+
 export interface TraineeCourse {
   id: number;
   title: string;
@@ -18,6 +21,11 @@ export interface TraineeCourse {
   recommended: boolean;
   paid?: boolean;
   tags: string[];
+  /** DSSカテゴリ（表示・フィルタ用） */
+  dssQuadrant?: DssQuadrant;
+  dssLabel?: string;
+  /** ライブイベントの開催日時（ISO文字列） */
+  liveAt?: string;
 }
 
 /** サムネイルなし時用のプレースホルダー（グラデーション＋イニシャル） */
@@ -44,6 +52,9 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     recommended: true,
     paid: true,
     tags: ["ライブイベント", "有償", "生成AI"],
+    dssQuadrant: "what",
+    dssLabel: "AI",
+    liveAt: "2026-04-01T14:00:00+09:00",
   },
   {
     id: 2,
@@ -55,6 +66,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: true,
     tags: ["デザイン"],
+    dssQuadrant: "how",
+    dssLabel: "デザイン思考",
   },
   {
     id: 3,
@@ -66,6 +79,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: true,
     tags: ["生成AI"],
+    dssQuadrant: "what",
+    dssLabel: "AI",
   },
   {
     id: 4,
@@ -77,6 +92,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["フロントエンド", "システム開発"],
+    dssQuadrant: "how",
+    dssLabel: "業務効率化",
   },
   {
     id: 5,
@@ -88,6 +105,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["プログラミング"],
+    dssQuadrant: "how",
+    dssLabel: "業務効率化",
   },
   {
     id: 6,
@@ -99,6 +118,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["データ", "AI", "生成AI"],
+    dssQuadrant: "what",
+    dssLabel: "AI",
   },
   {
     id: 7,
@@ -110,6 +131,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["データ", "AI"],
+    dssQuadrant: "what",
+    dssLabel: "データ分析",
   },
   {
     id: 8,
@@ -121,6 +144,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["ソフトウェア開発"],
+    dssQuadrant: "what",
+    dssLabel: "クラウド",
   },
   {
     id: 9,
@@ -132,6 +157,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["資格対策"],
+    dssQuadrant: "mindset",
+    dssLabel: "継続的学習",
   },
   {
     id: 10,
@@ -143,6 +170,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["フロントエンド", "システム開発"],
+    dssQuadrant: "how",
+    dssLabel: "業務効率化",
   },
   {
     id: 11,
@@ -154,6 +183,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["ネットワーク"],
+    dssQuadrant: "what",
+    dssLabel: "サイバーセキュリティ",
   },
   {
     id: 12,
@@ -165,6 +196,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["セキュリティ技術"],
+    dssQuadrant: "what",
+    dssLabel: "サイバーセキュリティ",
   },
   {
     id: 13,
@@ -177,6 +210,9 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     recommended: true,
     paid: true,
     tags: ["ライブイベント", "有償"],
+    dssQuadrant: "how",
+    dssLabel: "業務効率化",
+    liveAt: "2026-03-20T10:00:00+09:00",
   },
   {
     id: 14,
@@ -188,6 +224,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["基礎"],
+    dssQuadrant: "mindset",
+    dssLabel: "継続的学習",
   },
   {
     id: 15,
@@ -199,6 +237,8 @@ export const MOCK_TRAINEE_COURSES: TraineeCourse[] = [
     delivery: "self",
     recommended: false,
     tags: ["プログラミング"],
+    dssQuadrant: "how",
+    dssLabel: "業務効率化",
   },
 ];
 
