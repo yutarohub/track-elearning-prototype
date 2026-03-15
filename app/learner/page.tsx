@@ -7,7 +7,7 @@ export default function LearnerIndexPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/learner/workspace");
+    router.replace("/learner/home");
   }, [router]);
 
   return (

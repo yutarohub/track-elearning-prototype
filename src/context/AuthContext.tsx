@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setView = useCallback(
     (newView: "admin" | "learner") => {
       setViewState(newView);
-      if (newView === "learner") router.push("/learner/workspace");
+      if (newView === "learner") router.push("/learner/home");
       else router.push("/admin/dashboard");
     },
     [router]

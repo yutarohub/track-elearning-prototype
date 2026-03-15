@@ -20,7 +20,7 @@ export default function LoginPage() {
     const ok = await login(email, password);
     setLoading(false);
     if (ok) {
-      router.push("/admin/courses");
+      router.push("/admin/dashboard");
     } else {
       setError("IDまたはパスワードが正しくありません。");
     }
@@ -36,10 +36,10 @@ export default function LoginPage() {
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/10 p-8 shadow-xl backdrop-blur-xl">
           <h1 className="text-center text-2xl font-bold text-white">
-            Track Hub
+            Track e-learning
           </h1>
           <p className="mt-1 text-center text-sm text-white/70">
-            新生 eラーニング統合ダッシュボード
+            eラーニング・集合研修用 統合ダッシュボード
           </p>
 
           <h2 className="mt-8 text-xs font-semibold uppercase tracking-wider text-white/80">

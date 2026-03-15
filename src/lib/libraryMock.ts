@@ -111,7 +111,7 @@ export const MOCK_LIBRARY_SURVEYS: LibrarySurvey[] = [
 ];
 
 export const MOCK_LIBRARY_VIDEOS: LibraryVideo[] = [
-  { id: 1, title: "デジタルまるしぇ 新たな人材育成の柱 「トヨタソフトウェアアカデミー」とは?", playbackTime: "25:39", uploadTime: "2025年7月8日", badges: ["自社オリジナル"] },
+  { id: 1, title: "デジタル人材育成の柱 「○○ソフトウェアアカデミー」とは?", playbackTime: "25:39", uploadTime: "2025年7月8日", badges: ["自社オリジナル"] },
   { id: 2, title: "5-3_結合テスト・総合テスト_総合テスト", playbackTime: "00:08", uploadTime: "2025年3月12日", badges: ["Track公式"] },
 ];
 
@@ -137,7 +137,7 @@ export const MOCK_LIBRARY_COURSES: LibraryCourseRow[] = [
   { id: 1, title: "CI/CD (Terraform) 基礎講座 実践編", estimatedTime: "1時間", materialCount: 1, publishType: "e-learning", badges: ["Track公式"] },
   { id: 2, title: "Linux 基礎講座 実践編 3日版 【集合研修用】", estimatedTime: "14時間", materialCount: 14, publishType: "training", badges: ["Track公式", "training"] },
   { id: 3, title: "運用・保守基礎講座 実践編", estimatedTime: "1時間", materialCount: 1, publishType: "e-learning", badges: ["Track公式"] },
-  { id: 4, title: "ライブハンズオン Zoom開催", estimatedTime: "2時間", materialCount: 1, publishType: "live", badges: ["live"] },
+  { id: 4, title: "ライブハンズオン（オンライン開催）", estimatedTime: "2時間", materialCount: 1, publishType: "live", badges: ["live"] },
   { id: 5, title: "オフライン集合研修 会場実施", estimatedTime: "6時間", materialCount: 1, publishType: "training", badges: ["training"] },
 ];
 

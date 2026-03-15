@@ -55,8 +55,8 @@ const COURSE_TABS: { id: LibraryCourseCategory; label: string; icon: typeof Fold
 
 const FILTER_CHIPS: { id: PublishFilter; label: string }[] = [
   { id: "e-learning", label: "eラーニング用" },
+  { id: "training", label: "集合研修用" },
   { id: "live", label: "ライブイベント用" },
-  { id: "training", label: "研修用" },
 ];
 
 const CM_BASE_URL = "https://cm.tracks.run"; // モック: CMのベースURL
@@ -565,7 +565,7 @@ export default function LibraryPage() {
                         courseForm.format === "self" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
                       }`}
                     >
-                      自学用 (Self-paced)
+                      自学習用
                     </button>
                     <button
                       type="button"
@@ -574,7 +574,7 @@ export default function LibraryPage() {
                         courseForm.format === "live" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
                       }`}
                     >
-                      ライブイベント (Live Event)
+                      ライブイベント
                     </button>
                   </div>
                 </div>

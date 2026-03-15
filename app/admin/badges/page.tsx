@@ -75,14 +75,14 @@ export default function BadgesPage() {
   return (
     <AppLayout>
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">バッジ一覧</h1>
+        <h1 className="text-2xl font-bold text-slate-900">バッジ管理</h1>
         <button
           type="button"
           onClick={openCreate}
           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 font-medium text-white shadow-lg transition hover:from-indigo-500 hover:to-violet-500"
         >
           <Plus className="h-5 w-5" />
-          バッジを作成
+          バッジを追加
         </button>
       </div>
 
@@ -164,7 +164,7 @@ export default function BadgesPage() {
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
               <h2 id="badge-modal-title" className="text-lg font-semibold text-slate-900">
-                {modalOpen === "create" ? "バッジを作成" : "バッジを編集"}
+                {modalOpen === "create" ? "バッジを追加" : "バッジを編集"}
               </h2>
               <button
                 type="button"

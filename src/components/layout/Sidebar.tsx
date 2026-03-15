@@ -4,33 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  BookOpen,
   Send,
-  MessageSquare,
   Users,
-  TestTube,
   FileText,
   Library,
   Sparkles,
   Award,
   ChevronDown,
   HeadphonesIcon,
+  Star,
 } from "lucide-react";
 
 const navLearning = [
   { label: "ダッシュボード", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "eラーニング管理", href: "/admin/courses", icon: BookOpen },
   { label: "eラーニング公開管理", href: "/admin/publish", icon: Send },
   { label: "申請管理", href: "#", icon: FileText },
-  { label: "ディスカッション", href: "#", icon: MessageSquare },
 ];
 
 const navTenant = [
   { label: "メンバー", href: "#", icon: Users },
-  { label: "試験", href: "#", icon: TestTube },
   { label: "契約", href: "#", icon: FileText },
   { label: "ライブラリ", href: "/admin/library", icon: Library },
-  { label: "バッジ", href: "/admin/badges", icon: Award },
+  { label: "バッジ管理", href: "/admin/badges", icon: Award },
+  { label: "コースレイティング", href: "/admin/course-ratings", icon: Star },
   { label: "AIアシスタント", href: "#", icon: Sparkles },
 ];
 
@@ -47,7 +43,7 @@ export function Sidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-lg font-black text-white">
           T
         </div>
-        <span className="font-semibold text-white">Track Hub</span>
+        <span className="font-semibold text-white">Track e-learning</span>
       </div>
 
       <div className="border-b border-white/[0.06] px-3 py-3">
