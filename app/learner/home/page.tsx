@@ -55,9 +55,10 @@ export default function LearnerHomePage() {
           </div>
           <button
             type="button"
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="編集"
+            className="flex items-center gap-1 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            aria-label="編集（開発中）"
           >
+            <span className="text-slate-400" aria-hidden>🚧</span>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
@@ -78,9 +79,9 @@ export default function LearnerHomePage() {
         </div>
         <button
           type="button"
-          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+          className="mt-4 flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          スキルギャップを確認する
+          スキルギャップを確認する<span className="text-white" aria-hidden>🚧</span>
         </button>
       </div>
 

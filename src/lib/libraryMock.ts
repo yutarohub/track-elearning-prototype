@@ -17,6 +17,9 @@ export type LibraryCourseCategory = "course" | "learningpath";
 
 export type PublishFilter = "e-learning" | "live" | "training";
 
+/** コース一覧の複合フィルター: eラーニング（自学習・ライブ） / 集合研修 */
+export type CoursePublishFilter = "e-learning-or-live" | "training";
+
 export type BadgeKind = "Track公式" | "自社オリジナル" | "New" | "e-learning" | "live" | "training";
 
 // ブック
@@ -75,7 +78,7 @@ export interface LibrarySlide {
   badges: BadgeKind[];
 }
 
-// コース（公開区分でフィルタ）
+// コース（公開区分・タグでフィルタ）
 export interface LibraryCourseRow {
   id: number;
   title: string;
@@ -83,9 +86,10 @@ export interface LibraryCourseRow {
   materialCount: number;
   publishType: PublishFilter;
   badges: BadgeKind[];
+  tags: string[];
 }
 
-// 学習パス（公開区分でフィルタ可能）
+// 学習パス（公開区分・タグでフィルタ可能）
 export interface LibraryLearningPath {
   id: number;
   title: string;
@@ -94,6 +98,7 @@ export interface LibraryLearningPath {
   hasElearning: boolean;
   publishType: PublishFilter;
   badges: BadgeKind[];
+  tags: string[];
 }
 
 export const MOCK_LIBRARY_BOOKS: LibraryBook[] = [
@@ -111,7 +116,7 @@ export const MOCK_LIBRARY_SURVEYS: LibrarySurvey[] = [
 ];
 
 export const MOCK_LIBRARY_VIDEOS: LibraryVideo[] = [
-  { id: 1, title: "デジタル人材育成の柱 「○○ソフトウェアアカデミー」とは?", playbackTime: "25:39", uploadTime: "2025年7月8日", badges: ["自社オリジナル"] },
+  { id: 1, title: "デジタル人材育成講座", playbackTime: "25:39", uploadTime: "2025年7月8日", badges: ["自社オリジナル"] },
   { id: 2, title: "5-3_結合テスト・総合テスト_総合テスト", playbackTime: "00:08", uploadTime: "2025年3月12日", badges: ["Track公式"] },
 ];
 
@@ -134,16 +139,16 @@ export const MOCK_LIBRARY_SLIDES: LibrarySlide[] = [
 ];
 
 export const MOCK_LIBRARY_COURSES: LibraryCourseRow[] = [
-  { id: 1, title: "CI/CD (Terraform) 基礎講座 実践編", estimatedTime: "1時間", materialCount: 1, publishType: "e-learning", badges: ["Track公式"] },
-  { id: 2, title: "Linux 基礎講座 実践編 3日版 【集合研修用】", estimatedTime: "14時間", materialCount: 14, publishType: "training", badges: ["Track公式", "training"] },
-  { id: 3, title: "運用・保守基礎講座 実践編", estimatedTime: "1時間", materialCount: 1, publishType: "e-learning", badges: ["Track公式"] },
-  { id: 4, title: "ライブハンズオン（オンライン開催）", estimatedTime: "2時間", materialCount: 1, publishType: "live", badges: ["live"] },
-  { id: 5, title: "オフライン集合研修 会場実施", estimatedTime: "6時間", materialCount: 1, publishType: "training", badges: ["training"] },
+  { id: 1, title: "CI/CD (Terraform) 基礎講座 実践編", estimatedTime: "1時間", materialCount: 1, publishType: "e-learning", badges: ["Track公式"], tags: ["クラウド", "アプリ開発"] },
+  { id: 2, title: "Linux 基礎講座 実践編 3日版 【集合研修用】", estimatedTime: "14時間", materialCount: 14, publishType: "training", badges: ["Track公式", "training"], tags: ["プログラミング基礎"] },
+  { id: 3, title: "運用・保守基礎講座 実践編", estimatedTime: "1時間", materialCount: 1, publishType: "e-learning", badges: ["Track公式"], tags: ["プロジェクト管理"] },
+  { id: 4, title: "ライブハンズオン（オンライン開催）", estimatedTime: "2時間", materialCount: 1, publishType: "live", badges: ["live"], tags: ["生成AI", "アプリ開発"] },
+  { id: 5, title: "オフライン集合研修 会場実施", estimatedTime: "6時間", materialCount: 1, publishType: "training", badges: ["training"], tags: ["デザイン思考"] },
 ];
 
 export const MOCK_LIBRARY_LEARNING_PATHS: LibraryLearningPath[] = [
-  { id: 1, title: "IPA情報処理技術者ラーニングパス", courseCount: 24, estimatedTime: "1週", hasElearning: true, publishType: "e-learning", badges: ["Track公式"] },
-  { id: 2, title: "クラウドインフララーニングパス", courseCount: 20, estimatedTime: "5日4時間", hasElearning: true, publishType: "e-learning", badges: ["Track公式"] },
-  { id: 3, title: "ライブハンズオン集中パス", courseCount: 5, estimatedTime: "2日", hasElearning: false, publishType: "live", badges: ["live"] },
-  { id: 4, title: "集合研修 管理職向けパス", courseCount: 8, estimatedTime: "3日", hasElearning: false, publishType: "training", badges: ["training"] },
+  { id: 1, title: "IPA情報処理技術者ラーニングパス", courseCount: 24, estimatedTime: "1週", hasElearning: true, publishType: "e-learning", badges: ["Track公式"], tags: ["プログラミング基礎", "データ分析"] },
+  { id: 2, title: "クラウドインフララーニングパス", courseCount: 20, estimatedTime: "5日4時間", hasElearning: true, publishType: "e-learning", badges: ["Track公式"], tags: ["クラウド", "セキュリティ"] },
+  { id: 3, title: "ライブハンズオン集中パス", courseCount: 5, estimatedTime: "2日", hasElearning: false, publishType: "live", badges: ["live"], tags: ["機械学習", "生成AI"] },
+  { id: 4, title: "集合研修 管理職向けパス", courseCount: 8, estimatedTime: "3日", hasElearning: false, publishType: "training", badges: ["training"], tags: ["プロジェクト管理", "デザイン思考"] },
 ];

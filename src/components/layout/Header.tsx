@@ -36,18 +36,20 @@ export function Header() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            aria-label="通知"
-            className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            aria-label="通知（開発中）"
+            className="relative flex items-center gap-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           >
             <Bell className="h-5 w-5" />
+            <span className="text-slate-600" aria-hidden>🚧</span>
             <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500" />
           </button>
           <button
             type="button"
-            aria-label="設定"
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            aria-label="設定（開発中）"
+            className="flex items-center gap-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           >
             <Settings className="h-5 w-5" />
+            <span className="text-slate-600" aria-hidden>🚧</span>
           </button>
           <div className="ml-2 h-6 w-px bg-slate-200" />
 

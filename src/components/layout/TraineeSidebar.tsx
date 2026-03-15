@@ -111,7 +111,7 @@ export function TraineeSidebar() {
                           key={child.label}
                           className="block rounded-lg px-2 py-1.5 text-xs text-white/50"
                         >
-                          {child.label}
+                          {child.label}<span className="text-inherit" aria-hidden> 🚧</span>
                         </span>
                       );
                     }
@@ -139,6 +139,7 @@ export function TraineeSidebar() {
       <div className="absolute bottom-0 left-0 right-0 border-t border-white/[0.06] p-3">
         <button
           type="button"
+          aria-label="プロフィール（開発中）"
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-white/80 hover:bg-white/[0.06] hover:text-white/90"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/80 text-sm font-bold text-white">
@@ -146,7 +147,7 @@ export function TraineeSidebar() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-white">{displayName}</p>
-            <p className="text-[10px] text-white/50">プロフィール</p>
+            <p className="text-[10px] text-white/50">プロフィール<span className="text-inherit" aria-hidden> 🚧</span></p>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 text-white/50" />
         </button>

@@ -24,6 +24,10 @@ export interface PublishedCourse {
   enrollmentLimit?: "public" | "application";
   recommend?: boolean;
   providerInfo?: boolean;
+  /** 提供者情報を表示が有効なときの組織名・ロゴ・作成者 */
+  providerName?: string;
+  providerLogoUrl?: string;
+  providerCreator?: string;
   // 申込（要申込時）
   applyFlow?: "immediate" | "approval";
   applyStartDate?: string;
@@ -33,6 +37,8 @@ export interface PublishedCourse {
   applyPeriod?: string;
   // 想定受講者（スキル可視化プラットフォーム連動）
   jobRoleId?: string;
+  // タグ（ライブラリフィルター・検索用）
+  tags?: string[];
 }
 
 /** コース名等の固有名詞はマスキング（○○社等） */

@@ -52,10 +52,10 @@ export function Sidebar() {
         </p>
         <button
           type="button"
-          aria-label='ワークスペース「Track e-learning」を選択'
+          aria-label='ワークスペース「Track e-learning」を選択（開発中）'
           className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-white hover:bg-white/[0.06]"
         >
-          <span>Track e-learning</span>
+          <span>Track e-learning<span className="text-inherit" aria-hidden> 🚧</span></span>
           <ChevronDown className="h-4 w-4 text-white/50" />
         </button>
       </div>
@@ -70,7 +70,7 @@ export function Sidebar() {
           const content = (
             <>
               <Icon className="h-5 w-5 shrink-0" />
-              <span>{item.label}</span>
+              <span>{item.label}{item.href === "#" ? <span className="text-inherit" aria-hidden> 🚧</span> : null}</span>
             </>
           );
           const className = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
@@ -107,7 +107,7 @@ export function Sidebar() {
           const content = (
             <>
               <Icon className="h-5 w-5 shrink-0" />
-              <span>{item.label}</span>
+              <span>{item.label}{item.href === "#" ? <span className="text-inherit" aria-hidden> 🚧</span> : null}</span>
             </>
           );
           const className = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
@@ -137,11 +137,11 @@ export function Sidebar() {
       <div className="absolute bottom-0 left-0 right-0 border-t border-white/[0.06] p-3">
         <button
           type="button"
-          aria-label="サポートへ問い合わせ"
+          aria-label="サポートへ問い合わせ（開発中）"
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:bg-white/[0.06] hover:text-white/90"
         >
           <HeadphonesIcon className="h-5 w-5" />
-          サポートへ問い合わせ
+          サポートへ問い合わせ<span className="text-inherit" aria-hidden> 🚧</span>
         </button>
       </div>
     </aside>

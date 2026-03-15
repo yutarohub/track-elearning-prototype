@@ -19,10 +19,12 @@ import {
   MapPin,
   X,
 } from "lucide-react";
+import { CourseCreateWizard } from "@/components/CourseCreateWizard";
+import type { CourseWizardResult } from "@/components/CourseCreateWizard";
 import type {
   LibraryMaterialCategory,
   LibraryCourseCategory,
-  PublishFilter,
+  CoursePublishFilter,
   LibraryBook,
   LibrarySurvey,
   LibraryVideo,
@@ -32,6 +34,7 @@ import type {
   LibraryCourseRow,
   LibraryLearningPath,
 } from "@/lib/libraryMock";
+import { COURSE_TAG_OPTIONS } from "@/lib/courseTags";
 import {
   MOCK_LIBRARY_BOOKS,
   MOCK_LIBRARY_SURVEYS,
@@ -61,10 +64,10 @@ const COURSE_TABS: { id: LibraryCourseCategory; label: string; icon: typeof Fold
   { id: "learningpath", label: "学習パス", icon: GraduationCap },
 ];
 
-const FILTER_CHIPS: { id: PublishFilter; label: string }[] = [
-  { id: "e-learning", label: "eラーニング用" },
+/** 複合フィルター: eラーニング（自学習用・ライブイベント） / 集合研修用 */
+const COURSE_PUBLISH_FILTERS: { id: CoursePublishFilter; label: string }[] = [
+  { id: "e-learning-or-live", label: "eラーニング（自学習用・ライブイベント）" },
   { id: "training", label: "集合研修用" },
-  { id: "live", label: "ライブイベント用" },
 ];
 
 const TCM_BASE_URL = "https://tcm.tracks.run"; // モック: TCMのベースURL
@@ -94,18 +97,13 @@ function Badge({ kind }: { kind: string }) {
 export default function LibraryPage() {
   const [tab, setTab] = useState<LibraryTab>("book");
   const [search, setSearch] = useState("");
-  const [publishFilter, setPublishFilter] = useState<PublishFilter | null>(null);
+  const [coursePublishFilter, setCoursePublishFilter] = useState<CoursePublishFilter | null>(null);
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [courseModalOpen, setCourseModalOpen] = useState(false);
-  const [courseModalStep, setCourseModalStep] = useState(1);
-  const [courseForm, setCourseForm] = useState({
-    target: "" as "e-learning" | "training" | "",
-    format: "" as "self" | "live" | "",
-    liveType: "" as "online" | "offline" | "",
-    publish: "" as "free" | "paid" | "",
-    price: "",
-    applyPeriod: "",
-  });
+  const [courseWizardOpen, setCourseWizardOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [createdCourses, setCreatedCourses] = useState<LibraryCourseRow[]>([]);
+  const [createdLearningPaths, setCreatedLearningPaths] = useState<LibraryLearningPath[]>([]);
 
   const isUploadCategory = tab === "video" || tab === "file";
   const isCourseCategory = tab === "course" || tab === "learningpath";
@@ -123,24 +121,67 @@ export default function LibraryPage() {
     if (tab === "app") return filterBySearch(MOCK_LIBRARY_APPS, "name");
     if (tab === "slide") return filterBySearch(MOCK_LIBRARY_SLIDES);
     if (tab === "course") {
-      let list = MOCK_LIBRARY_COURSES;
-      if (publishFilter) list = list.filter((c) => c.publishType === publishFilter);
+      let list = [...MOCK_LIBRARY_COURSES, ...createdCourses];
+      if (coursePublishFilter) {
+        if (coursePublishFilter === "e-learning-or-live") {
+          list = list.filter((c) => c.publishType === "e-learning" || c.publishType === "live");
+        } else {
+          list = list.filter((c) => c.publishType === "training");
+        }
+      }
+      if (tagFilter) list = list.filter((c) => c.tags.includes(tagFilter));
       return filterBySearch(list);
     }
     if (tab === "learningpath") {
-      let list = MOCK_LIBRARY_LEARNING_PATHS;
-      if (publishFilter) list = list.filter((l) => l.publishType === publishFilter);
+      let list = [...MOCK_LIBRARY_LEARNING_PATHS, ...createdLearningPaths];
+      if (coursePublishFilter) {
+        if (coursePublishFilter === "e-learning-or-live") {
+          list = list.filter((l) => l.publishType === "e-learning" || l.publishType === "live");
+        } else {
+          list = list.filter((l) => l.publishType === "training");
+        }
+      }
+      if (tagFilter) list = list.filter((l) => l.tags.includes(tagFilter));
       return filterBySearch(list);
     }
     return [];
-  }, [tab, search, publishFilter]);
+  }, [tab, search, coursePublishFilter, tagFilter, createdCourses, createdLearningPaths]);
 
   const openUploadModal = () => setUploadModalOpen(true);
-  const openCourseModal = () => {
-    setCourseForm({ target: "", format: "", liveType: "", publish: "", price: "", applyPeriod: "" });
-    setCourseModalStep(1);
-    setCourseModalOpen(true);
-  };
+
+  function handleCourseWizardComplete(data: CourseWizardResult) {
+    const publishType = data.publishTarget === "training" ? "training" : data.publishTarget === "live" ? "live" : "e-learning";
+    if (tab === "course") {
+      setCreatedCourses((prev) => [
+        ...prev,
+        {
+          id: 1000 + createdCourses.length,
+          title: data.courseName,
+          estimatedTime: "—",
+          materialCount: 0,
+          publishType,
+          badges: [],
+          tags: data.tags ?? [],
+        },
+      ]);
+    } else {
+      setCreatedLearningPaths((prev) => [
+        ...prev,
+        {
+          id: 1000 + createdLearningPaths.length,
+          title: data.courseName,
+          courseCount: 0,
+          estimatedTime: "—",
+          hasElearning: publishType !== "training",
+          publishType,
+          badges: [],
+          tags: data.tags ?? [],
+        },
+      ]);
+    }
+    setToast("コースを作成しました。eラーニング公開管理で公開できます。");
+    setTimeout(() => setToast(null), 3000);
+  }
 
   return (
     <AppLayout>
@@ -202,25 +243,43 @@ export default function LibraryPage() {
             </div>
 
             {isCourseCategory && (
-              <div className="flex flex-wrap gap-2">
-                {FILTER_CHIPS.map(({ id, label }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setPublishFilter(publishFilter === id ? null : id)}
-                    className={`rounded-full px-3 py-1.5 text-sm transition ${
-                      publishFilter === id
-                        ? id === "e-learning"
-                          ? "bg-blue-600 text-white"
-                          : id === "live"
-                            ? "bg-emerald-600 text-white"
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500">公開区分:</span>
+                  {COURSE_PUBLISH_FILTERS.map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setCoursePublishFilter(coursePublishFilter === id ? null : id)}
+                      className={`rounded-full px-3 py-1.5 text-sm transition ${
+                        coursePublishFilter === id
+                          ? id === "e-learning-or-live"
+                            ? "bg-blue-600 text-white"
                             : "bg-slate-600 text-white"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500">タグ:</span>
+                  {COURSE_TAG_OPTIONS.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
+                      className={`rounded-full px-3 py-1.5 text-sm transition ${
+                        tagFilter === tag
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -249,7 +308,7 @@ export default function LibraryPage() {
               {isCourseCategory && (
                 <button
                   type="button"
-                  onClick={openCourseModal}
+                  onClick={() => setCourseWizardOpen(true)}
                   className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
                 >
                   <Plus className="h-4 w-4" />
@@ -325,6 +384,7 @@ export default function LibraryPage() {
                           <th className="px-4 py-3 font-semibold text-slate-700">タイトル</th>
                           <th className="px-4 py-3 font-semibold text-slate-700">想定受講時間</th>
                           <th className="px-4 py-3 font-semibold text-slate-700">マテリアル</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700">タグ</th>
                           <th className="px-4 py-3 font-semibold text-slate-700">Eラーニング</th>
                         </>
                       )}
@@ -334,6 +394,7 @@ export default function LibraryPage() {
                           <th className="px-4 py-3 font-semibold text-slate-700">タイトル</th>
                           <th className="px-4 py-3 font-semibold text-slate-700">講座</th>
                           <th className="px-4 py-3 font-semibold text-slate-700">想定受講時間</th>
+                          <th className="px-4 py-3 font-semibold text-slate-700">タグ</th>
                           <th className="px-4 py-3 font-semibold text-slate-700">Eラーニング</th>
                         </>
                       )}
@@ -356,7 +417,7 @@ export default function LibraryPage() {
                           <td className="px-4 py-3 text-slate-600">{row.chapters}</td>
                           <td className="px-4 py-3 text-slate-600">{row.estimatedTime}</td>
                           <td className="px-4 py-3 text-slate-600">{row.language}</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "survey" &&
@@ -369,7 +430,7 @@ export default function LibraryPage() {
                               {row.badges?.map((b) => <Badge key={b} kind={b} />)}
                             </div>
                           </td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "video" &&
@@ -384,7 +445,7 @@ export default function LibraryPage() {
                           </td>
                           <td className="px-4 py-3 text-slate-600">{row.playbackTime}</td>
                           <td className="px-4 py-3 text-slate-600">{row.uploadTime}</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "file" &&
@@ -399,7 +460,7 @@ export default function LibraryPage() {
                           <td className="px-4 py-3 text-slate-600">{row.fileType}</td>
                           <td className="px-4 py-3 text-slate-600">{row.fileSize}</td>
                           <td className="px-4 py-3 text-slate-600">{row.uploadTime}</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "app" &&
@@ -414,7 +475,7 @@ export default function LibraryPage() {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-slate-600">{row.estimatedTime}</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "slide" &&
@@ -430,7 +491,7 @@ export default function LibraryPage() {
                           <td className="px-4 py-3 text-slate-600">{row.pageCount}</td>
                           <td className="px-4 py-3 text-slate-600">{row.estimatedTime}</td>
                           <td className="px-4 py-3 text-slate-600">{row.language}</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "course" &&
@@ -444,8 +505,15 @@ export default function LibraryPage() {
                           </td>
                           <td className="px-4 py-3 text-slate-600">{row.estimatedTime}</td>
                           <td className="px-4 py-3 text-slate-600">{row.materialCount}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {row.tags?.length ? row.tags.map((t) => (
+                                <span key={t} className="rounded bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">{t}</span>
+                              )) : <span className="text-slate-400">—</span>}
+                            </div>
+                          </td>
                           <td className="px-4 py-3 text-slate-600">✓</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                     {tab === "learningpath" &&
@@ -460,8 +528,15 @@ export default function LibraryPage() {
                           </td>
                           <td className="px-4 py-3 text-slate-600">{row.courseCount}</td>
                           <td className="px-4 py-3 text-slate-600">{row.estimatedTime}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {row.tags?.length ? row.tags.map((t) => (
+                                <span key={t} className="rounded bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">{t}</span>
+                              )) : <span className="text-slate-400">—</span>}
+                            </div>
+                          </td>
                           <td className="px-4 py-3 text-slate-600">{row.hasElearning ? "✓" : "—"}</td>
-                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600">⋯</button></td>
+                          <td className="px-2 py-3"><button type="button" className="p-1 text-slate-400 hover:text-slate-600" aria-label="メニュー（開発中）">⋯<span className="text-slate-400" aria-hidden>🚧</span></button></td>
                         </tr>
                       ))}
                   </tbody>
@@ -512,186 +587,20 @@ export default function LibraryPage() {
         </div>
       )}
 
-      {/* コース作成モーダル（Progressive Disclosure） */}
-      {courseModalOpen && (
+      {/* コース作成：eラーニング公開管理と同じ共通ウィザード */}
+      <CourseCreateWizard
+        open={courseWizardOpen}
+        onClose={() => setCourseWizardOpen(false)}
+        onComplete={handleCourseWizardComplete}
+        title={tab === "course" ? "コースを作成" : "学習パスを作成"}
+      />
+
+      {toast && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-[fade-in_0.2s_ease-out]"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="course-modal-title"
+          className="fixed left-1/2 top-6 z-[60] -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-lg"
+          role="status"
         >
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl animate-[fade-in_0.2s_ease-out]">
-            <div className="flex items-center justify-between">
-              <h2 id="course-modal-title" className="text-lg font-semibold text-slate-900">
-                {tab === "course" ? "コースを作成" : "学習パスを作成"}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setCourseModalOpen(false)}
-                className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                aria-label="閉じる"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              {courseModalStep === 1 && (
-                <div className="animate-[fade-in_0.25s_ease-out]">
-                  <p className="mb-2 text-sm font-medium text-slate-700">ターゲット選択</p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, target: "e-learning" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.target === "e-learning" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      eラーニング用
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, target: "training" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.target === "training" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      集合研修用
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {courseModalStep >= 2 && (
-                <div className="animate-[fade-in_0.25s_ease-out]">
-                  <p className="mb-2 text-sm font-medium text-slate-700">形式選択</p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, format: "self" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.format === "self" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      自学習用
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, format: "live" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.format === "live" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      ライブイベント
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {courseModalStep >= 3 && courseForm.format === "live" && (
-                <div className="animate-[fade-in_0.25s_ease-out]">
-                  <p className="mb-2 text-sm font-medium text-slate-700">ライブイベント詳細</p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, liveType: "online" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.liveType === "online" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      オンライン (Zoomリンク入力)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, liveType: "offline" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.liveType === "offline" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      オフライン (会場入力)
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {courseModalStep >= (courseForm.format === "live" ? 4 : 3) && (
-                <div className="animate-[fade-in_0.25s_ease-out]">
-                  <p className="mb-2 text-sm font-medium text-slate-700">公開・申請設定</p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, publish: "free" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.publish === "free" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      即時受講 (無償)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCourseForm((f) => ({ ...f, publish: "paid" }))}
-                      className={`flex-1 rounded-lg border px-3 py-2.5 text-sm ${
-                        courseForm.publish === "paid" ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      受講申請を必須とする (有償・承認制)
-                    </button>
-                  </div>
-                  {courseForm.publish === "paid" && (
-                    <div className="mt-4 animate-[fade-in_0.25s_ease-out] space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700">料金</label>
-                        <input
-                          type="text"
-                          value={courseForm.price}
-                          onChange={(e) => setCourseForm((f) => ({ ...f, price: e.target.value }))}
-                          placeholder="例: 10,000円"
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700">申込期間</label>
-                        <input
-                          type="text"
-                          value={courseForm.applyPeriod}
-                          onChange={(e) => setCourseForm((f) => ({ ...f, applyPeriod: e.target.value }))}
-                          placeholder="例: 2025/01/01 ～ 2025/01/31"
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="mt-8 flex justify-between">
-              <button
-                type="button"
-                onClick={() => setCourseModalStep((s) => Math.max(1, s - 1))}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                戻る
-              </button>
-              {(courseModalStep === 3 && courseForm.format !== "live") || courseModalStep === 4 ? (
-                <button
-                  type="button"
-                  onClick={() => setCourseModalOpen(false)}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                >
-                  作成
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setCourseModalStep((s) => s + 1)}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                >
-                  次へ
-                </button>
-              )}
-            </div>
-          </div>
+          {toast}
         </div>
       )}
     </AppLayout>

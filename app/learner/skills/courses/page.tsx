@@ -177,6 +177,7 @@ function CourseCard({
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
         >
           講座受講サイトを開く
+          <span className="text-white" aria-hidden>🚧</span>
           <ExternalLink className="h-4 w-4" />
         </button>
       </div>
