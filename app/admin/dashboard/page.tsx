@@ -303,7 +303,7 @@ export default function DashboardPage() {
                     <YAxis tick={{ fontSize: 11 }} stroke="#64748b" tickFormatter={(v) => v.toLocaleString()} />
                     <Tooltip
                       contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                      formatter={(value: number) => [value.toLocaleString(), mauTab === "platform" ? "プラットフォームMAU" : "Track公式MAU"]}
+                      formatter={(value: unknown) => [(typeof value === "number" ? value : 0).toLocaleString(), mauTab === "platform" ? "プラットフォームMAU" : "Track公式MAU"]}
                       labelFormatter={(label) => label}
                     />
                     <Area
