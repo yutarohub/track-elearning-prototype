@@ -259,7 +259,7 @@ export function MaterialPicker({ selected, onSelectionChange, maxSelection = 0, 
                       <td className="px-3 py-2 text-slate-600">{row.language ?? "—"}</td>
                     )}
                     {(tab === "course" || tab === "learningpath") && (
-                      <td className="px-3 py-2 text-slate-600">{row.estimatedTime ?? "—"}</td>
+                      <td className="px-3 py-2 text-slate-600">{"estimatedTime" in row ? (row.estimatedTime ?? "—") : "—"}</td>
                     )}
                   </tr>
                 );

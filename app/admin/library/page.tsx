@@ -23,6 +23,14 @@ import type {
   LibraryMaterialCategory,
   LibraryCourseCategory,
   PublishFilter,
+  LibraryBook,
+  LibrarySurvey,
+  LibraryVideo,
+  LibraryFile,
+  LibraryApp,
+  LibrarySlide,
+  LibraryCourseRow,
+  LibraryLearningPath,
 } from "@/lib/libraryMock";
 import {
   MOCK_LIBRARY_BOOKS,
@@ -336,7 +344,7 @@ export default function LibraryPage() {
                   </thead>
                   <tbody>
                     {tab === "book" &&
-                      tableData.map((row: { id: number; name: string; chapters: number; estimatedTime: string; language: string; badges: string[] }) => (
+                      (tableData as LibraryBook[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3 text-slate-600">{row.id}</td>
                           <td className="px-4 py-3">
@@ -352,7 +360,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "survey" &&
-                      tableData.map((row: { id: number; title: string; badges: string[] }) => (
+                      (tableData as LibrarySurvey[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3 text-slate-600">{row.id}</td>
                           <td className="px-4 py-3">
@@ -365,7 +373,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "video" &&
-                      tableData.map((row: { id: number; title: string; playbackTime: string; uploadTime: string; badges: string[] }) => (
+                      (tableData as LibraryVideo[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3 text-slate-400">🎬</td>
                           <td className="px-4 py-3">
@@ -380,7 +388,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "file" &&
-                      tableData.map((row: { id: number; title: string; fileType: string; fileSize: string; uploadTime: string; badges: string[] }) => (
+                      (tableData as LibraryFile[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1">
@@ -395,7 +403,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "app" &&
-                      tableData.map((row: { id: number; name: string; version: string; estimatedTime: string; badges: string[] }) => (
+                      (tableData as LibraryApp[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3 text-slate-600">{row.id}</td>
                           <td className="px-4 py-3">
@@ -410,7 +418,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "slide" &&
-                      tableData.map((row: { id: number; title: string; pageCount: number; estimatedTime: string; language: string; badges: string[] }) => (
+                      (tableData as LibrarySlide[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3 text-slate-600">{row.id}</td>
                           <td className="px-4 py-3">
@@ -426,7 +434,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "course" &&
-                      tableData.map((row: { id: number; title: string; estimatedTime: string; materialCount: number; publishType: PublishFilter; badges: string[] }) => (
+                      (tableData as LibraryCourseRow[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1">
@@ -441,7 +449,7 @@ export default function LibraryPage() {
                         </tr>
                       ))}
                     {tab === "learningpath" &&
-                      tableData.map((row: { id: number; title: string; courseCount: number; estimatedTime: string; hasElearning: boolean; publishType?: PublishFilter; badges: string[] }) => (
+                      (tableData as LibraryLearningPath[]).map((row) => (
                         <tr key={row.id} className="border-b border-slate-100 hover:bg-slate-50/50">
                           <td className="px-4 py-3 text-slate-600">{row.id}</td>
                           <td className="px-4 py-3">

@@ -317,7 +317,7 @@ export default function DashboardPage() {
                 />
                 <Tooltip
                   contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                  formatter={(value: number) => [value, ""]}
+                  formatter={(value) => [value ?? 0, ""]}
                   labelFormatter={(label) => label}
                 />
                 <Legend />

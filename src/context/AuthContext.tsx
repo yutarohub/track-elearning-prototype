@@ -26,7 +26,35 @@ export type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const STORAGE_KEY = "track_user";
-const DEMO_USER: User = { email: "demo@track.local", role: "admin" };
+/** Middleware と同期する Cookie 名（未設定なら /login へリダイレクト） */
+export const AUTH_COOKIE = "track_session";
+
+const COOKIE_MAX_AGE_DAYS = 7;
+
+function setAuthCookie() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${AUTH_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * COOKIE_MAX_AGE_DAYS}; SameSite=Lax`;
+}
+
+function clearAuthCookie() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+/** このプロトタイプで許可する固定認証情報（それ以外はログイン失敗） */
+export const FIXED_LOGIN = {
+  email: "yutaro.iwasaki@givery.co.jp",
+  password: "tracklms",
+} as const;
+
+function isValidUser(u: unknown): u is User {
+  if (!u || typeof u !== "object") return false;
+  const o = u as Record<string, unknown>;
+  return (
+    o.email === FIXED_LOGIN.email &&
+    (o.role === "admin" || o.role === "learner")
+  );
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -47,12 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       const ok =
-        email === "yutaro.iwasaki@givery.co.jp" && password === "tracklms";
+        email === FIXED_LOGIN.email && password === FIXED_LOGIN.password;
       if (ok) {
-        const newUser: User = { email, role: "admin" };
+        const newUser: User = { email: FIXED_LOGIN.email, role: "admin" };
         setUser(newUser);
         if (typeof window !== "undefined") {
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
+          setAuthCookie();
         }
         return true;
       }
@@ -65,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
+      clearAuthCookie();
     }
     router.push("/login");
   }, [router]);
@@ -74,6 +104,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthChecked(true);
       return;
     }
+    // pathname が null のときは初期表示のためローディング扱いにするが、
+    // Next が pathname を渡すまで null のままになる環境では「読み込み中」で止まるため、
+    // null のときも authChecked を true にして先に進める。
+    // Middleware が未ログイン時は /login にしか流さないため、表示されるのはログイン画面になる。
     if (pathname == null) {
       setAuthChecked(true);
       return;
@@ -83,27 +117,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        const parsed = JSON.parse(raw) as User;
-        if (parsed?.email && (parsed.role === "admin" || parsed.role === "learner")) {
+        const parsed = JSON.parse(raw) as unknown;
+        if (isValidUser(parsed)) {
           setUser(parsed);
+          setAuthCookie(); // 復元時も Cookie を立てて Middleware を通過させる
           setAuthChecked(true);
           return;
         }
       } catch {
-        window.localStorage.removeItem(STORAGE_KEY);
+        // ignore
       }
+      window.localStorage.removeItem(STORAGE_KEY);
     }
 
-    const isAdminOrLearner =
-      pathname.startsWith("/admin") || pathname.startsWith("/learner");
-    if (isAdminOrLearner && process.env.NODE_ENV === "development") {
-      setUser(DEMO_USER);
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_USER));
-      setAuthChecked(true);
-      return;
-    }
-
-    router.push("/login");
+    // 未ログイン時は常にログインへ（開発時も自動ログインしない）
+    router.replace("/login");
     setAuthChecked(true);
   }, [pathname, router]);
 
