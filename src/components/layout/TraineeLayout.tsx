@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { TraineeSidebar } from "./TraineeSidebar";
+import { Header } from "./Header";
 
 export function TraineeLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -17,7 +18,8 @@ export function TraineeLayout({ children }: { children: React.ReactNode }) {
       </a>
       <TraineeSidebar />
       <div className="pl-64">
-        <main id="main-content" className="min-h-screen pt-4" tabIndex={-1}>
+        <Header />
+        <main id="main-content" className="min-h-screen pt-16" tabIndex={-1}>
           <div className="p-6 md:p-8">{children}</div>
         </main>
       </div>

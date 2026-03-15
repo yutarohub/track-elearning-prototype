@@ -10,7 +10,6 @@ import {
   Award,
   ClipboardList,
   BookOpen,
-  LogOut,
 } from "lucide-react";
 
 const navItems: (
@@ -52,7 +51,7 @@ const navItems: (
 
 export function TraineeSidebar() {
   const pathname = usePathname();
-  const { user, setView } = useAuth();
+  const { user } = useAuth();
 
   const displayName = user?.email ? "岩崎 雄太郎" : "受講者";
   const initial = displayName.slice(0, 1);
@@ -137,7 +136,7 @@ export function TraineeSidebar() {
         })}
       </nav>
 
-      <div className="absolute bottom-0 left-0 right-0 border-t border-white/[0.06] p-3 space-y-1">
+      <div className="absolute bottom-0 left-0 right-0 border-t border-white/[0.06] p-3">
         <button
           type="button"
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-white/80 hover:bg-white/[0.06] hover:text-white/90"
@@ -150,14 +149,6 @@ export function TraineeSidebar() {
             <p className="text-[10px] text-white/50">プロフィール</p>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 text-white/50" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("admin")}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/60 hover:bg-white/[0.06] hover:text-white/80"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          管理者ビューへ
         </button>
       </div>
     </aside>
