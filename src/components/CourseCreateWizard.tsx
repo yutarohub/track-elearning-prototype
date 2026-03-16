@@ -18,6 +18,8 @@ export interface CourseWizardResult {
   recommendedAudience?: string;
   whatYouLearn?: string;
   jobRoleId?: string;
+   /** 推奨受講職種（複数） */
+  jobRoleIds?: string[];
   liveType?: "online" | "offline";
   enrollmentLimit: "public" | "application";
   recommend: boolean;
@@ -25,6 +27,10 @@ export interface CourseWizardResult {
   providerName?: string;
   providerLogoUrl?: string;
   providerCreator?: string;
+  /** 講師情報（ライブ・外部連携向け） */
+  instructorName?: string;
+  instructorAvatarUrl?: string;
+  instructorBio?: string;
   applyFlow: "immediate" | "approval";
   applyStartDate?: string;
   applyEndDate?: string;
@@ -42,8 +48,16 @@ export interface CourseCreateWizardProps {
   title?: string;
 }
 
+const JOB_FAMILIES: { id: string; name: string; roleIds: string[] }[] = [
+  { id: "eng", name: "エンジニアリング", roleIds: ["jr-01", "jr-02", "jr-03", "jr-04", "jr-08", "jr-09", "jr-10"] },
+  { id: "pm", name: "プロダクト・プロジェクト", roleIds: ["jr-05", "jr-06", "jr-11", "jr-12"] },
+  { id: "gtm", name: "営業・カスタマーサクセス", roleIds: ["jr-13", "jr-14"] },
+  { id: "hr", name: "人事・バックオフィス", roleIds: ["jr-15", "jr-16", "jr-17"] },
+  { id: "other", name: "その他・共通", roleIds: ["jr-18", "jr-19", "jr-20"] },
+];
+
 const INITIAL_FORM = {
-  flowMode: "from_materials" as "existing_course" | "from_materials",
+  flowMode: "from_materials" as "existing_course" | "from_materials" | "from_external" | "from_other_org",
   selectedExistingCourse: null as PickedMaterial | null,
   materialType: "library" as "video" | "file" | "library",
   uploadProgress: 0 as number,
@@ -52,6 +66,7 @@ const INITIAL_FORM = {
   description: "",
   difficulty: "",
   jobRoleId: "",
+  jobRoleIds: [] as string[],
   recommendedAudience: "",
   whatYouLearn: "",
   target: "" as "e-learning" | "training" | "live" | "",
@@ -62,6 +77,19 @@ const INITIAL_FORM = {
   providerName: "",
   providerLogoUrl: "",
   providerCreator: "",
+  instructorName: "",
+  instructorAvatarUrl: "",
+  instructorBio: "",
+  liveSchedules: [] as {
+    id: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    mode: "online" | "offline";
+    onlineUrl?: string;
+    venue?: string;
+    materialNote?: string;
+  }[],
   applyFlow: "immediate" as "immediate" | "approval",
   applyStartDate: "",
   applyEndDate: "",
@@ -80,6 +108,8 @@ export function CourseCreateWizard({
 }: CourseCreateWizardProps) {
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardForm, setWizardForm] = useState(INITIAL_FORM);
+  const [selectedJobFamilyId, setSelectedJobFamilyId] = useState<string>(JOB_FAMILIES[0]?.id ?? "");
+  const [jobSearch, setJobSearch] = useState("");
 
   function handleClose() {
     setWizardForm(INITIAL_FORM);
@@ -100,7 +130,8 @@ export function CourseCreateWizard({
       difficulty: wizardForm.difficulty || undefined,
       recommendedAudience: wizardForm.recommendedAudience || undefined,
       whatYouLearn: wizardForm.whatYouLearn || undefined,
-      jobRoleId: wizardForm.jobRoleId || undefined,
+      jobRoleId: wizardForm.jobRoleId || wizardForm.jobRoleIds[0] || undefined,
+      jobRoleIds: wizardForm.jobRoleIds.length ? [...wizardForm.jobRoleIds] : undefined,
       liveType: (wizardForm.liveType || undefined) as "online" | "offline" | undefined,
       enrollmentLimit: wizardForm.enrollmentLimit,
       recommend: wizardForm.recommend,
@@ -108,6 +139,9 @@ export function CourseCreateWizard({
       providerName: wizardForm.providerName || undefined,
       providerLogoUrl: wizardForm.providerLogoUrl || undefined,
       providerCreator: wizardForm.providerCreator || undefined,
+      instructorName: wizardForm.instructorName || undefined,
+      instructorAvatarUrl: wizardForm.instructorAvatarUrl || undefined,
+      instructorBio: wizardForm.instructorBio || undefined,
       applyFlow: wizardForm.applyFlow,
       applyStartDate: wizardForm.applyStartDate || undefined,
       applyEndDate: wizardForm.applyEndDate || undefined,
@@ -162,7 +196,7 @@ export function CourseCreateWizard({
           {wizardStep === 1 && (
             <div className="space-y-4 animate-[fade-in_0.25s_ease-out]">
               <p className="text-sm font-medium text-slate-700">進め方を選んでください</p>
-              <div className="flex gap-3">
+              <div className="grid gap-3 md:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => setWizardForm((f) => ({ ...f, flowMode: "existing_course", selectedExistingCourse: null }))}
@@ -219,17 +253,26 @@ export function CourseCreateWizard({
                     />
                   )}
                   {(wizardForm.materialType === "video" || wizardForm.materialType === "file") && (
-                    <div className="mt-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-10"
+                    <div
+                      className="mt-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-10"
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => e.preventDefault()}
                     >
                       <Upload className="mx-auto h-10 w-10 text-slate-400" />
                       <p className="mt-2 text-center text-sm text-slate-600">ドラッグ＆ドロップ、またはクリックして選択</p>
                       <p className="mt-1 text-center text-xs text-slate-500">アップロード中も次へ進めます</p>
+                      <p className="mt-2 text-center text-[11px] text-slate-500">
+                        アップロードされた動画・PDFは、バックエンド実装後に Track Content Manager (TCM) と自動同期される想定です（現在はモック）。
+                      </p>
                       {wizardForm.uploadProgress > 0 && wizardForm.uploadProgress < 100 && (
                         <div className="mx-auto mt-3 w-48 rounded-full bg-slate-200">
                           <div className="h-2 rounded-full bg-indigo-600 transition-all" style={{ width: `${wizardForm.uploadProgress}%` }} />
                         </div>
+                      )}
+                      {wizardForm.uploadProgress === 100 && (
+                        <p className="mt-2 text-center text-[11px] text-emerald-600">
+                          TCM と同期済み（モック）
+                        </p>
                       )}
                     </div>
                   )}
@@ -275,19 +318,103 @@ export function CourseCreateWizard({
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-500">想定受講者（スキル可視化プラットフォーム連動）</label>
-                <p className="mt-0.5 text-[10px] text-slate-500">職種は別システムで定義されている86職種のJDと連動します。受講者がキャリア目的でコースを探しやすくします。</p>
-                <div className="mt-2 space-y-2">
-                  <select
-                    value={wizardForm.jobRoleId}
-                    onChange={(e) => setWizardForm((f) => ({ ...f, jobRoleId: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  >
-                    <option value="">職種を選択</option>
-                    {MOCK_JOB_ROLES.map((jr) => (
-                      <option key={jr.id} value={jr.id}>{jr.name}</option>
-                    ))}
-                  </select>
+                <label className="block text-xs text-slate-500">想定受講者（スキル開発プラットフォーム連動）</label>
+                <p className="mt-0.5 text-[10px] text-slate-500">
+                  職種は別システムで定義されている86職種のJDと連動します。左でジョブファミリー、右で具体的な職種をタグ形式で複数選択できます。
+                </p>
+                <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-slate-50/40 p-3">
+                  <div className="mb-2 flex items-center gap-2">
+                    <input
+                      type="search"
+                      value={jobSearch}
+                      onChange={(e) => setJobSearch(e.target.value)}
+                      placeholder="職種名で検索"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs"
+                    />
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-5">
+                    <div className="space-y-1 md:col-span-2">
+                      <p className="text-[11px] font-medium text-slate-600">ジョブファミリー</p>
+                      <div className="space-y-1">
+                        {JOB_FAMILIES.map((fam) => (
+                          <button
+                            key={fam.id}
+                            type="button"
+                            onClick={() => setSelectedJobFamilyId(fam.id)}
+                            className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-xs ${
+                              selectedJobFamilyId === fam.id
+                                ? "bg-indigo-600 text-white"
+                                : "bg-white text-slate-700 hover:bg-slate-100"
+                            }`}
+                          >
+                            <span className="truncate">{fam.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-1 md:col-span-3">
+                      <p className="text-[11px] font-medium text-slate-600">職種（複数選択可）</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {MOCK_JOB_ROLES.filter((jr) => {
+                          const fam = JOB_FAMILIES.find((f) => f.id === selectedJobFamilyId);
+                          if (!fam) return false;
+                          const inFamily = fam.roleIds.includes(jr.id);
+                          const matches =
+                            !jobSearch.trim() ||
+                            jr.name.toLowerCase().includes(jobSearch.trim().toLowerCase());
+                          return inFamily && matches;
+                        }).map((jr) => {
+                          const selected = wizardForm.jobRoleIds?.includes(jr.id) ?? false;
+                          return (
+                            <button
+                              key={jr.id}
+                              type="button"
+                              onClick={() =>
+                                setWizardForm((f) => ({
+                                  ...f,
+                                  jobRoleIds: selected
+                                    ? (f.jobRoleIds ?? []).filter((id) => id !== jr.id)
+                                    : [...(f.jobRoleIds ?? []), jr.id],
+                                }))
+                              }
+                              className={`rounded-full px-3 py-1.5 text-xs ${
+                                selected ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-slate-100"
+                              }`}
+                            >
+                              {jr.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  {wizardForm.jobRoleIds?.length ? (
+                    <div className="mt-2 border-t border-slate-200 pt-2">
+                      <p className="mb-1 text-[11px] font-medium text-slate-600">選択中の職種</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {wizardForm.jobRoleIds.map((id) => {
+                          const jr = MOCK_JOB_ROLES.find((r) => r.id === id);
+                          if (!jr) return null;
+                          return (
+                            <button
+                              key={id}
+                              type="button"
+                              onClick={() =>
+                                setWizardForm((f) => ({
+                                  ...f,
+                                  jobRoleIds: (f.jobRoleIds ?? []).filter((x) => x !== id),
+                                }))
+                              }
+                              className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-[11px] text-white"
+                            >
+                              <span>{jr.name}</span>
+                              <X className="h-3 w-3" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
                   <input
                     type="text"
                     value={wizardForm.recommendedAudience}
@@ -317,7 +444,21 @@ export function CourseCreateWizard({
               </div>
               <div>
                 <label className="block text-xs text-slate-500">タグ</label>
-                <p className="mt-0.5 text-[10px] text-slate-500">ライブラリのタグフィルターで検索できます。複数選択可能です。</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">
+                  ライブラリのタグフィルターで検索できます。複数選択可能です。
+                  <button
+                    type="button"
+                    className="ml-2 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700 hover:bg-indigo-100"
+                    onClick={() => {
+                      const base = new Set(wizardForm.tags ?? []);
+                      const candidates = ["生成AI", "データ分析", "プログラミング基礎"];
+                      candidates.forEach((t) => base.add(t));
+                      setWizardForm((f) => ({ ...f, tags: Array.from(base) as string[] }));
+                    }}
+                  >
+                    JD から生成（モック）
+                  </button>
+                </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {COURSE_TAG_OPTIONS.map((tag) => {
                     const selected = wizardForm.tags?.includes(tag) ?? false;
@@ -499,6 +640,149 @@ export function CourseCreateWizard({
                   </div>
                 )}
               </div>
+              {wizardForm.target === "live" && (
+                <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                  <p className="text-sm font-medium text-slate-700">ライブ開催スケジュール（モック）</p>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    onClick={() =>
+                      setWizardForm((f) => ({
+                        ...f,
+                        liveSchedules: [
+                          ...(f.liveSchedules ?? []),
+                          {
+                            id: String((f.liveSchedules?.length ?? 0) + 1),
+                            date: "",
+                            startTime: "",
+                            endTime: "",
+                            mode: f.liveType || "online",
+                            onlineUrl: "",
+                            venue: "",
+                            materialNote: "",
+                          },
+                        ],
+                      }))
+                    }
+                  >
+                    + 日程を追加
+                  </button>
+                  <div className="space-y-2">
+                    {(wizardForm.liveSchedules ?? []).map((s) => (
+                      <div
+                        key={s.id}
+                        className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 text-xs md:flex-row md:items-center"
+                      >
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-500">開催日</span>
+                          <input
+                            type="date"
+                            value={s.date}
+                            onChange={(e) =>
+                              setWizardForm((f) => ({
+                                ...f,
+                                liveSchedules: (f.liveSchedules ?? []).map((x) =>
+                                  x.id === s.id ? { ...x, date: e.target.value } : x,
+                                ),
+                              }))
+                            }
+                            className="rounded border border-slate-200 px-2 py-1"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-500">時間</span>
+                          <input
+                            type="time"
+                            value={s.startTime}
+                            onChange={(e) =>
+                              setWizardForm((f) => ({
+                                ...f,
+                                liveSchedules: (f.liveSchedules ?? []).map((x) =>
+                                  x.id === s.id ? { ...x, startTime: e.target.value } : x,
+                                ),
+                              }))
+                            }
+                            className="rounded border border-slate-200 px-2 py-1"
+                          />
+                          <span>〜</span>
+                          <input
+                            type="time"
+                            value={s.endTime}
+                            onChange={(e) =>
+                              setWizardForm((f) => ({
+                                ...f,
+                                liveSchedules: (f.liveSchedules ?? []).map((x) =>
+                                  x.id === s.id ? { ...x, endTime: e.target.value } : x,
+                                ),
+                              }))
+                            }
+                            className="rounded border border-slate-200 px-2 py-1"
+                          />
+                        </div>
+                        {s.mode === "online" ? (
+                          <input
+                            type="url"
+                            value={s.onlineUrl}
+                            onChange={(e) =>
+                              setWizardForm((f) => ({
+                                ...f,
+                                liveSchedules: (f.liveSchedules ?? []).map((x) =>
+                                  x.id === s.id ? { ...x, onlineUrl: e.target.value } : x,
+                                ),
+                              }))
+                            }
+                            placeholder="Zoom / Teams リンク"
+                            className="flex-1 rounded border border-slate-200 px-2 py-1"
+                          />
+                        ) : (
+                          <div className="flex flex-1 flex-col gap-1">
+                            <input
+                              type="text"
+                              value={s.venue}
+                              onChange={(e) =>
+                                setWizardForm((f) => ({
+                                  ...f,
+                                  liveSchedules: (f.liveSchedules ?? []).map((x) =>
+                                    x.id === s.id ? { ...x, venue: e.target.value } : x,
+                                  ),
+                                }))
+                              }
+                              placeholder="会場住所"
+                              className="rounded border border-slate-200 px-2 py-1"
+                            />
+                            <input
+                              type="text"
+                              value={s.materialNote}
+                              onChange={(e) =>
+                                setWizardForm((f) => ({
+                                  ...f,
+                                  liveSchedules: (f.liveSchedules ?? []).map((x) =>
+                                    x.id === s.id ? { ...x, materialNote: e.target.value } : x,
+                                  ),
+                                }))
+                              }
+                              placeholder="事前資料（TCM上のPDFなど）のメモ"
+                              className="rounded border border-slate-200 px-2 py-1"
+                            />
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setWizardForm((f) => ({
+                              ...f,
+                              liveSchedules: (f.liveSchedules ?? []).filter((x) => x.id !== s.id),
+                            }))
+                          }
+                          className="self-start rounded border border-slate-200 px-2 py-1 text-slate-500 hover:bg-slate-50"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <label className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
                 <span className="text-sm text-slate-700">おすすめにする</span>
                 <Toggle
@@ -571,6 +855,41 @@ export function CourseCreateWizard({
                           className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
                         />
                         <Pencil className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                      </div>
+                    </div>
+                    <div className="border-t border-dashed border-slate-200 pt-3">
+                      <p className="text-xs font-medium text-slate-700">講師情報（ライブ・外部連携用）</p>
+                      <div className="mt-2 space-y-2">
+                        <div>
+                          <label className="block text-xs text-slate-500">講師名</label>
+                          <input
+                            type="text"
+                            value={wizardForm.instructorName}
+                            onChange={(e) => setWizardForm((f) => ({ ...f, instructorName: e.target.value }))}
+                            placeholder="例: 佐藤 花子"
+                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500">プロフィール写真 URL</label>
+                          <input
+                            type="url"
+                            value={wizardForm.instructorAvatarUrl}
+                            onChange={(e) => setWizardForm((f) => ({ ...f, instructorAvatarUrl: e.target.value }))}
+                            placeholder="https://..."
+                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500">講師略歴</label>
+                          <textarea
+                            value={wizardForm.instructorBio}
+                            onChange={(e) => setWizardForm((f) => ({ ...f, instructorBio: e.target.value }))}
+                            rows={2}
+                            placeholder="例: クラウドインフラとDevOpsを専門とする社内認定トレーナー。"
+                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

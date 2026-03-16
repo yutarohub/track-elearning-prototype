@@ -25,6 +25,7 @@ import {
 import { MOCK_COURSES } from "@/lib/mockData";
 import type { Course, CourseType, Difficulty } from "@/lib/mockData";
 import { ProgressIndicator } from "@/components/dashboard/ProgressIndicator";
+import { FLAT_DEPARTMENTS, getDepartmentById, getDepartmentScale } from "@/lib/orgMock";
 import { X, TrendingUp, Clock, Award, AlertCircle, Sparkles, Search, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const INSIGHT_ICONS: Record<AIInsightItem["type"], React.ComponentType<{ className?: string }>> = {
@@ -137,6 +138,7 @@ function TypeBadge({ type }: { type: CourseType }) {
 }
 
 type MauTab = "platform" | "track";
+type DepartmentId = "all" | string;
 
 export default function DashboardPage() {
   const [drawerCourse, setDrawerCourse] = useState<Course | null>(null);
@@ -149,6 +151,7 @@ export default function DashboardPage() {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
   const [mauTab, setMauTab] = useState<MauTab>("platform");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<DepartmentId>("all");
 
   const filtered = useMemo(() => {
     let list = MOCK_COURSES;
@@ -172,18 +175,43 @@ export default function DashboardPage() {
   );
 
   const currentMonthData = MOCK_MAU_BY_MONTH.find((m) => m.yearMonth === selectedMonth);
-  const platformMau = currentMonthData?.platform ?? 0;
-  const trackOfficialMau = currentMonthData?.trackOfficial ?? 0;
+  const deptScale = getDepartmentScale(selectedDepartmentId);
+  const platformMau = Math.round((currentMonthData?.platform ?? 0) * deptScale);
+  const trackOfficialMau = Math.round((currentMonthData?.trackOfficial ?? 0) * deptScale);
   const trackMauPercent = Math.round(
     (trackOfficialMau / MOCK_TRACK_MAU_PLAN_LIMIT) * 100
   );
+  const selectedDepartment = getDepartmentById(selectedDepartmentId);
 
   return (
     <AppLayout>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">ダッシュボード</h1>
-          <p className="mt-1 text-sm text-slate-500">LXP コックピット · 経営レポート & アクション</p>
+      <div className="space-y-6 px-6 py-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">ダッシュボード</h1>
+            <p className="mt-1 text-sm text-slate-500">LXP コックピット · 経営レポート & アクション</p>
+          </div>
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+            <p className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+              表示中: {selectedDepartment ? `${selectedDepartment.name}（配下含む）` : "全社"}
+            </p>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span>部門フィルター:</span>
+              <select
+                value={selectedDepartmentId}
+                onChange={(e) => setSelectedDepartmentId(e.target.value as DepartmentId)}
+                className="min-w-[200px] rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value="all">全社（すべての部門）</option>
+                {FLAT_DEPARTMENTS.filter((d) => d.id !== "dept-root").map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {`${"　".repeat(d.level)}${d.name}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Zone 1: AI インサイト（リッチ） & Dual MAU */}
