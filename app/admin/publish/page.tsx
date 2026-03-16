@@ -56,7 +56,10 @@ export default function PublishPage() {
   const [toast, setToast] = useState<{ message: string } | null>(null);
   const [statusMenuId, setStatusMenuId] = useState<string | null>(null);
 
-  const [courses, setCourses] = useState<PublishedCourse[]>(MOCK_PUBLISHED_COURSES);
+  // Track e-learning では公開管理の対象を「自学習用 eラーニング」と「ライブイベント」に限定
+  const [courses, setCourses] = useState<PublishedCourse[]>(
+    MOCK_PUBLISHED_COURSES.filter((c) => c.publishTarget !== "training")
+  );
 
   const filteredCourses = useMemo(() => {
     let list = courses;
@@ -144,7 +147,7 @@ export default function PublishPage() {
 
         {/* 右: メイン一覧 */}
         <div className="min-w-0 flex-1 p-6">
-          <h1 className="text-2xl font-bold text-slate-900">eラーニング・集合研修 公開管理</h1>
+          <h1 className="text-2xl font-bold text-slate-900">eラーニング公開管理（自学習＋ライブイベント）</h1>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div className="relative min-w-[200px] flex-1">
@@ -324,9 +327,12 @@ export default function PublishPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500">公開先</label>
+                  <label className="block text-xs text-slate-500">公開先（Track e-learning）</label>
+                  <p className="mt-0.5 text-[10px] text-slate-500">
+                    本システムでは、自学習用の eラーニング と ライブイベント のみ公開管理します。
+                  </p>
                   <div className="mt-1 flex gap-2">
-                    {(["e-learning", "live", "training"] as const).map((t) => (
+                    {(["e-learning", "live"] as const).map((t) => (
                       <button
                         key={t}
                         type="button"
