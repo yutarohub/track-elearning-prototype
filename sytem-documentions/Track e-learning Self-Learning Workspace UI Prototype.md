@@ -1,11 +1,11 @@
-# [Project Context] Track LMS: Self-Learning Workspace UI Prototype
+# [Project Context] Track e-learning: Self-Learning Workspace UI Prototype
 
 ## 1. System Overview (システム概要)
-本プロジェクトの目的は、ITエンジニア育成プラットフォーム「Track LMS」から独立する新しい「Self-Learning (自学自習) ワークスペース」のフロントエンドUIプロトタイプを作成することである。
+本プロジェクトの目的は、ITエンジニア育成プラットフォーム「Track e-learning」から独立する新しい「Self-Learning (自学自習) ワークスペース」のフロントエンドUIプロトタイプを作成することである。
 将来的に「Skill Hub」とのシームレスなマイクロサービス連携を前提としたモダンなUIを設計せよ。
 
 ## 2. Architectural Paradigm: Bootcamp vs Self-Learning
-UI設計の方向性を決定づけるため、Track LMSにおける2つの主要な学習パラダイムの違いを定義する。
+UI設計の方向性を決定づけるため、Track e-learningにおける2つの主要な学習パラダイムの違いを定義する。
 本プロジェクトでは **「Self-Learning」の要件**に基づいてUIを構築すること。
 
 | 比較項目 | Bootcamp (ブートキャンプ) | Self-Learning (セルフラーニング) [🎯本件の対象] |

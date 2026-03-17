@@ -14,14 +14,14 @@
 | **03-LAYOUT-AND-COMPONENTS.md** | AppLayout、Sidebar、Header、スキップリンク、スタイル方針 |
 | **04-PAGES-AND-FEATURES.md** | 各ページの役割、主要コンポーネント、モック利用箇所 |
 | **05-MOCK-DATA-SCHEMA.md** | Course / Badge / Material 型とサンプルデータ |
-| **Track LMS Admin Dashboard UI.md** | 管理画面のUIコンポーネントツリー（既存） |
-| **Track LMS Self-Learning Workspace UI Prototype.md** | 受講者ワークスペースのUX要件（既存） |
+| **Track e-learning Admin Dashboard UI.md** | 管理画面のUIコンポーネントツリー（既存） |
+| **Track e-learning Self-Learning Workspace UI Prototype.md** | 受講者ワークスペースのUX要件（既存） |
 
 ---
 
 ## 2. プロジェクト概要
 
-- **名前:** track-hub（Track LMS New Hub プロトタイプ）
+- **名前:** track-hub（Track e-learning New Hub プロトタイプ）
 - **目的:** eラーニング統合ダッシュボードのフロントエンドUIプロトタイプ。管理者向け「学習管理・公開管理・ライブラリ・バッジ・ダッシュボード」と、受講者向けワークスペース（Coming Soon）を同一アプリで提供する。
 - **スタック:** Next.js 16 (App Router)、React 19、TypeScript、Tailwind CSS 4、lucide-react、recharts。
 
@@ -112,6 +112,6 @@
 3. **03** で AppLayout / Sidebar / Header を実装し、管理画面の土台を用意する。
 4. **05** のモックデータを `src/lib/mockData.ts` に用意する。
 5. **04** に従い、各 admin ページ（dashboard → courses → publish → library → badges）と learner/workspace を実装する。
-6. 既存の **Track LMS Admin Dashboard UI.md** および **Track LMS Self-Learning Workspace UI Prototype.md** でUI詳細を補足する。
+6. 既存の **Track e-learning Admin Dashboard UI.md** および **Track e-learning Self-Learning Workspace UI Prototype.md** でUI詳細を補足する。
 
 以上で、別ワークスペースから本プロトタイプを再現できます。

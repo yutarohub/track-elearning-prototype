@@ -94,7 +94,7 @@ export default nextConfig;
 
 ## 6. ルートレイアウト (src/app/layout.tsx)
 
-- **metadata:** title `"Track LMS - New Hub"`, description `"Next Generation e-Learning Platform"`。
+- **metadata:** title `"Track e-learning - New Hub"`, description `"Next Generation e-Learning Platform"`。
 - **フォント:** `Inter({ subsets: ["latin"], display: "optional" })` を body に `className={inter.className}` で適用。
 - **html:** `lang="ja"`。
 - **body 直下:** `<AuthProvider>{children}</AuthProvider>`。全ページが認証コンテキスト内でレンダリングされる。

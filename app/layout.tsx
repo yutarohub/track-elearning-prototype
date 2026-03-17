@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], display: "optional" });
 
 export const metadata: Metadata = {
-  title: "Track LMS - New Hub",
+  title: "Track e-learning - New Hub",
   description: "Next Generation e-Learning Platform",
 };
 

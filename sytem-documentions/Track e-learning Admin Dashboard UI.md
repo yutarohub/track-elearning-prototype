@@ -1,4 +1,4 @@
-# [Component Architecture] Track LMS: Admin Dashboard UI
+# [Component Architecture] Track e-learning: Admin Dashboard UI
 
 ## 1. App Layout Overview (全体レイアウト構造)
 アプリケーション全体のレイアウトは、固定の「左側サイドバー (Sidebar)」、上部の「ヘッダー (Header)」、および動的に切り替わる「メインコンテンツ (Main Content)」の3つの主要セクションで構成される。
@@ -19,7 +19,7 @@
 
 ### 2.1. Sidebar `<Sidebar />`
 システム内の各管理機能へアクセスするためのグローバルナビゲーション。
-Track LMSの運用に必要な「学習管理」と「テナント（環境）管理」の機能がブロックで分かれている。
+Track e-learningの運用に必要な「学習管理」と「テナント（環境）管理」の機能がブロックで分かれている。
 
 ```text
 <Sidebar>

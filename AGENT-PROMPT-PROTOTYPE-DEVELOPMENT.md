@@ -7,14 +7,14 @@
 ## 指示プロンプト（コピーして使用）
 
 ```
-このワークスペースで、Track LMS の eラーニング統合ダッシュボード「Track Hub」のフロントエンドプロトタイプを一から開発してください。
+このワークスペースで、Track e-learning の eラーニング統合ダッシュボード「Track Hub」のフロントエンドプロトタイプを一から開発してください。
 
 ## 必須参照ドキュメント
 
 - **sytem-documentions/00-REBUILD-SPECIFICATION.md** を最初に読み、ドキュメント一覧・フォルダ構成・ルート一覧・起動方法・再構築の推奨順序を把握すること。
 - その後、**01 → 02 → 03 → 05 → 04** の順で sytem-documentions 内の各仕様書に従い実装すること。
-- **sytem-documentions/Track LMS Admin Dashboard UI.md** で管理画面のコンポーネントツリーとスタイル指示を確認すること。
-- **sytem-documentions/Track LMS Self-Learning Workspace UI Prototype.md** は受講者ワークスペースのUX要件（現状は Coming Soon でよい）。
+- **sytem-documentions/Track e-learning Admin Dashboard UI.md** で管理画面のコンポーネントツリーとスタイル指示を確認すること。
+- **sytem-documentions/Track e-learning Self-Learning Workspace UI Prototype.md** は受講者ワークスペースのUX要件（現状は Coming Soon でよい）。
 
 ## 技術スタック
 
@@ -38,7 +38,7 @@
 ## スタイル・UX
 
 - 管理画面メインは白・スレート基調（bg-slate-50）。サイドバー・ログインはダークネイビー #0f1629、アクセントは indigo / violet グラデーション。
-- バッジ・ボタン・角丸は 03 および Track LMS Admin Dashboard UI.md の指示に従う。ProgressIndicator はプログレスバーと完了数バッジの組み合わせとする。
+- バッジ・ボタン・角丸は 03 および Track e-learning Admin Dashboard UI.md の指示に従う。ProgressIndicator はプログレスバーと完了数バッジの組み合わせとする。
 - アクセシビリティ: フォームの label/id、aria-label、role="alert"、スキップリンクを仕様どおり実装すること。
 
 ## 動作確認
