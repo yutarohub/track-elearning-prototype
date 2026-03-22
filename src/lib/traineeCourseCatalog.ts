@@ -171,3 +171,53 @@ export function isFiltersDefault(f: CatalogFilters): boolean {
     f.durationBucket === null
   );
 }
+
+/** 一覧ページ「View All」用のビュー種別 */
+export type CatalogBrowseView =
+  | "recommended"
+  | "upcoming-live"
+  | "new"
+  | "popular"
+  | "category";
+
+export function applyBrowseView(
+  courses: TraineeCourse[],
+  view: CatalogBrowseView,
+  category: string | null,
+): TraineeCourse[] {
+  switch (view) {
+    case "recommended":
+      return courses.filter((c) => c.recommended).sort((a, b) => a.id - b.id);
+    case "upcoming-live":
+      return [...courses].filter((c) => c.delivery === "live").sort(sortByLiveSoon);
+    case "new":
+      return [...courses].sort(sortByNewest);
+    case "popular":
+      return [...courses].sort(sortByPopular);
+    case "category":
+      if (!category) return [];
+      return courses.filter((c) => c.category === category).sort(sortByPopular);
+    default:
+      return [...courses].sort((a, b) => a.id - b.id);
+  }
+}
+
+export function browseViewTitle(
+  view: CatalogBrowseView,
+  category: string | null,
+): string {
+  switch (view) {
+    case "recommended":
+      return "あなたへのおすすめ（全件）";
+    case "upcoming-live":
+      return "近日開催のライブセッション（全件）";
+    case "new":
+      return "新着コース（全件）";
+    case "popular":
+      return "Hubで人気（全件）";
+    case "category":
+      return category ? `「${category}」で人気（全件）` : "カテゴリ（全件）";
+    default:
+      return "コース一覧";
+  }
+}

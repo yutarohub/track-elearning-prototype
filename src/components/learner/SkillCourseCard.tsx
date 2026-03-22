@@ -41,9 +41,10 @@ function Stars({ value }: { value: number }) {
   );
 }
 
+/** 申込状況: 受付中 / 満席 / 近日 */
 function liveStatusLabel(status: LiveEnrollmentStatus | undefined): string {
-  if (status === "waitlist") return "キャンセル待ち";
-  if (status === "next_session") return "次回開催予定";
+  if (status === "waitlist") return "満席（キャンセル待ち）";
+  if (status === "next_session") return "近日開催予定";
   return "申込受付中";
 }
 
@@ -68,6 +69,28 @@ function HighlightedText({ text, tokens }: { text: string; tokens: string[] }) {
   );
 }
 
+function livePrimaryCta(status: LiveEnrollmentStatus | undefined): {
+  label: string;
+  className: string;
+} {
+  if (status === "waitlist") {
+    return {
+      label: "キャンセル待ちに登録",
+      className: "bg-amber-600 hover:bg-amber-700",
+    };
+  }
+  if (status === "next_session") {
+    return {
+      label: "次回開催を確認",
+      className: "bg-slate-600 hover:bg-slate-700",
+    };
+  }
+  return {
+    label: "受講を申し込む",
+    className: "bg-emerald-600 hover:bg-emerald-700",
+  };
+}
+
 export function SkillCourseCard({
   course,
   searchTokens,
@@ -83,6 +106,7 @@ export function SkillCourseCard({
 }) {
   const thumb = courseThumbnailUrl(course);
   const isLive = course.delivery === "live";
+  const liveCta = livePrimaryCta(course.liveEnrollmentStatus);
 
   return (
     <article
@@ -148,7 +172,7 @@ export function SkillCourseCard({
           </p>
         )}
 
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+        <div className="mt-2 flex min-h-[28px] flex-wrap items-center gap-2 text-xs text-slate-600">
           {course.reviewCount < 5 ? (
             <span className="rounded-full bg-violet-100 px-2 py-0.5 font-medium text-violet-800">
               New
@@ -242,12 +266,10 @@ export function SkillCourseCard({
             type="button"
             onClick={() => onPrimaryAction(course)}
             className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white shadow-sm transition ${
-              isLive
-                ? "bg-emerald-600 hover:bg-emerald-700"
-                : "bg-indigo-600 hover:bg-indigo-700"
+              isLive ? liveCta.className : "bg-indigo-600 hover:bg-indigo-700"
             }`}
           >
-            {isLive ? "受講を申し込む" : "今すぐ学習を開始"}
+            {isLive ? liveCta.label : "今すぐ学習を開始"}
           </button>
         </div>
       </div>
