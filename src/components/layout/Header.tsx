@@ -9,8 +9,18 @@ import {
   LogOut,
   Wrench,
   ExternalLink,
+  GraduationCap,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+
+function headerDisplayName(view: "admin" | "learner", email: string | undefined) {
+  const local = email?.split("@")[0];
+  if (view === "learner") {
+    return local === "yutaro.iwasaki" ? "岩崎 雄太郎" : local ?? "受講者";
+  }
+  return "Track 管理";
+}
 
 export function Header() {
   const { view, setView, user, logout } = useAuth();
@@ -32,8 +42,29 @@ export function Header() {
       className="fixed left-64 right-0 top-0 z-10 h-16 border-b border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-xl"
       role="banner"
     >
-      <div className="flex h-full items-center justify-end px-6">
-        <div className="flex items-center gap-2">
+      <div className="flex h-full items-center justify-between px-6">
+        <div className="min-w-0 flex-1">
+          {view === "admin" ? (
+            <button
+              type="button"
+              onClick={() => setView("learner")}
+              className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50/90 px-3 py-1.5 text-sm font-medium text-indigo-900 shadow-sm transition hover:bg-indigo-100"
+            >
+              <GraduationCap className="h-4 w-4 shrink-0 text-indigo-600" aria-hidden />
+              受講者ビューへ
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setView("admin")}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50"
+            >
+              <LayoutDashboard className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />
+              管理者ビューへ
+            </button>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             aria-label="通知（開発中）"
@@ -70,9 +101,11 @@ export function Header() {
                 {user?.email?.slice(0, 2).toUpperCase() ?? "YU"}
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-slate-900">Track Admin</p>
+                <p className="text-sm font-medium text-slate-900">
+                  {headerDisplayName(view, user?.email)}
+                </p>
                 <p className="text-[10px] uppercase tracking-wider text-slate-500">
-                  {view === "admin" ? "管理者" : "受講者"}
+                  {view === "admin" ? "管理者ビュー" : "受講者ビュー"}
                 </p>
               </div>
               <ChevronDown

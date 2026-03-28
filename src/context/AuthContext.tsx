@@ -72,6 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [router]
   );
 
+  /** 直リンク・リロード時も URL と役割表示を一致させる */
+  useEffect(() => {
+    if (!pathname || pathname === "/login") return;
+    if (pathname.startsWith("/learner")) {
+      setViewState("learner");
+    } else if (pathname.startsWith("/admin")) {
+      setViewState("admin");
+    }
+  }, [pathname]);
+
   const login = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       const ok =

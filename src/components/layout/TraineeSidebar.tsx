@@ -10,6 +10,7 @@ import {
   Award,
   ClipboardList,
   BookOpen,
+  LayoutDashboard,
 } from "lucide-react";
 
 const navItems: (
@@ -51,7 +52,7 @@ const navItems: (
 
 export function TraineeSidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, setView } = useAuth();
 
   const displayName = user?.email ? "岩崎 雄太郎" : "受講者";
   const initial = displayName.slice(0, 1);
@@ -69,7 +70,7 @@ export function TraineeSidebar() {
         <span className="font-semibold text-white">Track e-learning</span>
       </div>
 
-      <nav className="space-y-1 px-3 py-4">
+      <nav className="space-y-1 px-3 py-4 pb-52">
         {navItems.map((item) => {
           const Icon = item.icon;
           if ("href" in item) {
@@ -136,7 +137,18 @@ export function TraineeSidebar() {
         })}
       </nav>
 
-      <div className="absolute bottom-0 left-0 right-0 border-t border-white/[0.06] p-3">
+      <div className="absolute bottom-0 left-0 right-0 space-y-2 border-t border-white/[0.06] bg-[#0f1629] p-3">
+        <button
+          type="button"
+          onClick={() => setView("admin")}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0f1629]"
+        >
+          <LayoutDashboard className="h-5 w-5 shrink-0" aria-hidden />
+          管理者ビューへ
+        </button>
+        <p className="px-1 text-center text-[10px] leading-snug text-white/45">
+          同じアカウントで Track 管理画面に戻る
+        </p>
         <button
           type="button"
           aria-label="プロフィール（開発中）"
