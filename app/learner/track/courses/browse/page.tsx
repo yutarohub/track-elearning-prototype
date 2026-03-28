@@ -4,7 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { MOCK_TRAINEE_COURSES } from "@/lib/traineeCoursesMock";
+import { MOCK_TRAINEE_COURSES, hasSampleCourseStartPage } from "@/lib/traineeCoursesMock";
 import type { TraineeCourse } from "@/lib/traineeCoursesMock";
 import {
   DEFAULT_CATALOG_FILTERS,
@@ -34,6 +34,12 @@ function parseView(raw: string | null): CatalogBrowseView {
   return "popular";
 }
 
+function courseStartHref(courseId: number): string | undefined {
+  return hasSampleCourseStartPage(courseId)
+    ? `/learner/track/courses/${courseId}/start`
+    : undefined;
+}
+
 function BrowseCoursesContent() {
   const searchParams = useSearchParams();
   const view = parseView(searchParams.get("view"));
@@ -59,11 +65,21 @@ function BrowseCoursesContent() {
   }
 
   function handlePrimaryAction(course: TraineeCourse) {
-    setToast(
-      course.delivery === "live"
-        ? `「${course.title}」の受講申込フローは準備中です（モック）`
-        : `「${course.title}」の学習を開始します（モック）`,
-    );
+    if (hasSampleCourseStartPage(course.id)) return;
+    if (course.delivery === "live") {
+      setToast(`「${course.title}」の受講申込フローは準備中です（モック）`);
+      setTimeout(() => setToast(null), 3200);
+      return;
+    }
+    if (course.paid && course.paidSelfFlowStatus === "pending_approval") {
+      return;
+    }
+    if (course.paid && course.paidSelfFlowStatus === "none") {
+      setToast(`「${course.title}」の有償受講申請を送信しました（モック）`);
+      setTimeout(() => setToast(null), 3200);
+      return;
+    }
+    setToast(`「${course.title}」の学習を開始します（モック）`);
     setTimeout(() => setToast(null), 3200);
   }
 
@@ -72,7 +88,7 @@ function BrowseCoursesContent() {
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
         <nav className="flex flex-wrap items-center gap-3 text-sm">
           <Link
-            href="/learner/skills/courses"
+            href="/learner/track/courses"
             className="inline-flex items-center gap-1 font-medium text-indigo-600 hover:text-indigo-800"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -106,6 +122,7 @@ function BrowseCoursesContent() {
                   favorite={favoriteIds.has(course.id)}
                   onToggleFavorite={() => toggleFavorite(course.id)}
                   onPrimaryAction={handlePrimaryAction}
+                  primaryHref={courseStartHref(course.id)}
                 />
               ))}
             </div>
@@ -125,7 +142,7 @@ function BrowseCoursesContent() {
   );
 }
 
-export default function LearnerSkillsCoursesBrowsePage() {
+export default function TrackCoursesBrowsePage() {
   return (
     <Suspense
       fallback={

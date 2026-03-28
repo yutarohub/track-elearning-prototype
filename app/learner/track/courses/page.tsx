@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { MOCK_TRAINEE_COURSES } from "@/lib/traineeCoursesMock";
+import { useSearchParams } from "next/navigation";
+import { MOCK_TRAINEE_COURSES, hasSampleCourseStartPage } from "@/lib/traineeCoursesMock";
 import type { TraineeCourse } from "@/lib/traineeCoursesMock";
 import {
   DEFAULT_CATALOG_FILTERS,
@@ -21,7 +22,6 @@ import { ChevronRight } from "lucide-react";
 
 const SECTION_LIMIT = 8;
 
-/** コース数が多いカテゴリから上位（DSS準拠の探索補助） */
 function topCategoriesByVolume(courses: TraineeCourse[], limit: number): string[] {
   const counts = new Map<string, number>();
   courses.forEach((c) => counts.set(c.category, (counts.get(c.category) ?? 0) + 1));
@@ -57,6 +57,12 @@ function CatalogSectionHeader({
   );
 }
 
+function courseStartHref(courseId: number): string | undefined {
+  return hasSampleCourseStartPage(courseId)
+    ? `/learner/track/courses/${courseId}/start`
+    : undefined;
+}
+
 function HorizontalCourseRow({
   courses,
   searchTokens,
@@ -80,6 +86,7 @@ function HorizontalCourseRow({
             favorite={favoriteIds.has(course.id)}
             onToggleFavorite={() => onToggleFavorite(course.id)}
             onPrimaryAction={onPrimary}
+            primaryHref={courseStartHref(course.id)}
           />
         </div>
       ))}
@@ -87,10 +94,18 @@ function HorizontalCourseRow({
   );
 }
 
-export default function LearnerSkillsCoursesPage() {
+function TrackCoursesPageInner() {
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<CatalogFilters>(DEFAULT_CATALOG_FILTERS);
   const [toast, setToast] = useState<string | null>(null);
   const { favoriteIds, toggleFavorite } = useSkillCourseFavorites();
+
+  useEffect(() => {
+    const source = searchParams.get("source");
+    if (source === "from_gap" || source === "from_recommend") {
+      setFilters((f) => ({ ...f, catalogContextMode: source }));
+    }
+  }, [searchParams]);
 
   const searchTokens = useMemo(() => tokenizeSearch(filters.searchRaw), [filters.searchRaw]);
   const filtered = useMemo(() => filterCourses(MOCK_TRAINEE_COURSES, filters), [filters]);
@@ -136,19 +151,55 @@ export default function LearnerSkillsCoursesPage() {
   }
 
   function handlePrimaryAction(course: TraineeCourse) {
-    setToast(
-      course.delivery === "live"
-        ? `「${course.title}」の受講申込フローは準備中です（モック）`
-        : `「${course.title}」の学習を開始します（モック）`,
-    );
+    if (hasSampleCourseStartPage(course.id)) return;
+    if (course.delivery === "live") {
+      setToast(`「${course.title}」の受講申込フローは準備中です（モック）`);
+      setTimeout(() => setToast(null), 3200);
+      return;
+    }
+    if (course.paid && course.paidSelfFlowStatus === "pending_approval") {
+      return;
+    }
+    if (course.paid && course.paidSelfFlowStatus === "none") {
+      setToast(`「${course.title}」の有償受講申請を送信しました（モック）`);
+      setTimeout(() => setToast(null), 3200);
+      return;
+    }
+    setToast(`「${course.title}」の学習を開始します（モック）`);
     setTimeout(() => setToast(null), 3200);
   }
+
+  const contextBanner =
+    filters.catalogContextMode === "from_gap" ? (
+      <p className="rounded-xl border border-sky-200 bg-sky-50/90 px-4 py-3 text-sm text-sky-950">
+        <span className="font-semibold">スキルギャップ連動:</span>{" "}
+        ギャップ補完に関連しそうなタグ・カテゴリで絞り込み中です。{" "}
+        <Link
+          href="/learner/skill-hub/gap"
+          className="font-medium text-indigo-700 underline-offset-2 hover:underline"
+        >
+          Skill Hub のギャップ一覧へ戻る
+        </Link>
+      </p>
+    ) : filters.catalogContextMode === "from_recommend" ? (
+      <p className="rounded-xl border border-violet-200 bg-violet-50/90 px-4 py-3 text-sm text-violet-950">
+        <span className="font-semibold">AIレコメンド連動:</span> おすすめコースのみ表示しています。{" "}
+        <Link
+          href="/learner/track/recommendations"
+          className="font-medium text-indigo-700 underline-offset-2 hover:underline"
+        >
+          レコメンド画面へ戻る
+        </Link>
+      </p>
+    ) : null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
         <nav className="text-sm text-slate-500" aria-label="パンくず">
-          スキル習得 / コース
+          <span className="text-slate-400">Track e-learning</span>
+          <span className="mx-2">/</span>
+          コース一覧
         </nav>
 
         <header>
@@ -159,6 +210,8 @@ export default function LearnerSkillsCoursesPage() {
         </header>
 
         <CourseCatalogFilterPanel filters={filters} setFilters={setFilters} onClearAll={clearAll} />
+
+        {contextBanner}
 
         {!showDiscoverySections && (
           <p className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900">
@@ -172,7 +225,7 @@ export default function LearnerSkillsCoursesPage() {
             <CatalogSectionHeader
               title="あなたへのおすすめ"
               hint="Recommended — パーソナライズ（モック）"
-              viewAllHref="/learner/skills/courses/browse?view=recommended"
+              viewAllHref="/learner/track/courses/browse?view=recommended"
             />
             <HorizontalCourseRow
               courses={recommended}
@@ -189,7 +242,7 @@ export default function LearnerSkillsCoursesPage() {
             <CatalogSectionHeader
               title="近日開催のライブセッション"
               hint="Upcoming Live — 開催日が近い順"
-              viewAllHref="/learner/skills/courses/browse?view=upcoming-live"
+              viewAllHref="/learner/track/courses/browse?view=upcoming-live"
             />
             <HorizontalCourseRow
               courses={upcomingLive}
@@ -206,7 +259,7 @@ export default function LearnerSkillsCoursesPage() {
             <CatalogSectionHeader
               title="新着コース"
               hint="New Releases"
-              viewAllHref="/learner/skills/courses/browse?view=new"
+              viewAllHref="/learner/track/courses/browse?view=new"
             />
             <HorizontalCourseRow
               courses={newest}
@@ -223,7 +276,7 @@ export default function LearnerSkillsCoursesPage() {
             <CatalogSectionHeader
               title="Hubで人気"
               hint="Popular on Hub — モックスコア順"
-              viewAllHref="/learner/skills/courses/browse?view=popular"
+              viewAllHref="/learner/track/courses/browse?view=popular"
             />
             <HorizontalCourseRow
               courses={popularHub}
@@ -241,7 +294,7 @@ export default function LearnerSkillsCoursesPage() {
               <CatalogSectionHeader
                 title={`「${category}」で人気`}
                 hint="Popular in Category"
-                viewAllHref={`/learner/skills/courses/browse?view=category&category=${encodeURIComponent(category)}`}
+                viewAllHref={`/learner/track/courses/browse?view=category&category=${encodeURIComponent(category)}`}
               />
               <HorizontalCourseRow
                 courses={courses}
@@ -259,7 +312,7 @@ export default function LearnerSkillsCoursesPage() {
             <p className="mt-0.5 text-xs text-slate-500">
               {filtered.length} 件（フィルター後）·{" "}
               <Link
-                href="/learner/skills/courses/browse?view=popular"
+                href="/learner/track/courses/browse?view=popular"
                 className="font-medium text-indigo-600 hover:text-indigo-800"
               >
                 全件ページで開く
@@ -288,6 +341,7 @@ export default function LearnerSkillsCoursesPage() {
                   favorite={favoriteIds.has(course.id)}
                   onToggleFavorite={() => toggleFavorite(course.id)}
                   onPrimaryAction={handlePrimaryAction}
+                  primaryHref={courseStartHref(course.id)}
                 />
               ))}
             </div>
@@ -304,5 +358,17 @@ export default function LearnerSkillsCoursesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TrackCoursesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F8FAFC] px-4 py-16 text-center text-slate-600">読み込み中…</div>
+      }
+    >
+      <TrackCoursesPageInner />
+    </Suspense>
   );
 }
