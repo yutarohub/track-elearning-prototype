@@ -349,7 +349,7 @@ export const MOCK_BADGES: Badge[] = [
     color: "#8b5cf6",
     icon: "🔮",
     imageSrc: "/badges/badge-2-google-ai-explorer.png",
-    courseIds: [4],
+    courseIds: [1, 4],
     issued: 3,
   },
   {
@@ -385,9 +385,14 @@ export const MOCK_BADGES: Badge[] = [
   },
 ];
 
+/** コース ID に紐づくモックバッジ定義（なければ undefined） */
+export function getBadgeForCourseId(courseId: number): Badge | undefined {
+  return MOCK_BADGES.find((b) => b.courseIds.includes(courseId));
+}
+
 /** コース ID に紐づくバッジ画像（なければ undefined） */
 export function getBadgeImageSrcForCourseId(courseId: number): string | undefined {
-  return MOCK_BADGES.find((b) => b.courseIds.includes(courseId))?.imageSrc;
+  return getBadgeForCourseId(courseId)?.imageSrc;
 }
 
 /** バッジ ID の画像 */

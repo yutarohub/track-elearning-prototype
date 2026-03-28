@@ -1,32 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Award } from "lucide-react";
 import { useLearnerProgress } from "@/context/LearnerProgressContext";
-import { getBadgeImageSrcForCourseId } from "@/lib/mockData";
+import { getBadgeForCourseId } from "@/lib/mockData";
 import { MOCK_TRAINEE_COURSES } from "@/lib/traineeCoursesMock";
+import { OpenBadgeImage } from "@/components/badges/OpenBadgeImage";
 
-const MOCK_EARNED_BADGES: { id: string; name: string; at: string; imageSrc?: string }[] = [
-  { id: "b-onboarding", name: "オンボーディング完了", at: "2025-12-01" },
-  { id: "b-security", name: "セキュリティ基礎", at: "2026-02-20" },
+type EarnedRow = {
+  id: string;
+  name: string;
+  at: string;
+  imageSrc?: string;
+  accentColor: string;
+};
+
+const MOCK_EARNED_BADGES: EarnedRow[] = [
+  {
+    id: "b-onboarding",
+    name: "オンボーディング完了",
+    at: "2025-12-01",
+    imageSrc: "/badges/badge-1-chatgpt-master.png",
+    accentColor: "#6366f1",
+  },
+  {
+    id: "b-security",
+    name: "セキュリティ基礎",
+    at: "2026-02-20",
+    imageSrc: "/badges/badge-3-data-science-intro.png",
+    accentColor: "#0ea5e9",
+  },
 ];
 
 export default function TrackLearnerBadgesPage() {
   const { earnedBadgeIds } = useLearnerProgress();
-  const dynamicBadges = earnedBadgeIds.map((id) => {
+  const dynamicBadges: EarnedRow[] = earnedBadgeIds.map((id) => {
     const m = /^badge-course-(\d+)$/.exec(id);
     const courseId = m ? parseInt(m[1], 10) : NaN;
     const title = Number.isFinite(courseId)
       ? MOCK_TRAINEE_COURSES.find((c) => c.id === courseId)?.title
       : undefined;
-    const imageSrc =
-      Number.isFinite(courseId) ? getBadgeImageSrcForCourseId(courseId) : undefined;
+    const badge = Number.isFinite(courseId) ? getBadgeForCourseId(courseId) : undefined;
     return {
       id,
       name: title ? `修了: ${title}` : id.replace(/^badge-/, ""),
       at: "モック修了",
-      imageSrc,
+      imageSrc: badge?.imageSrc,
+      accentColor: badge?.color ?? "#64748b",
     };
   });
 
@@ -39,32 +59,30 @@ export default function TrackLearnerBadgesPage() {
           修了やプログラム達成で付与されたバッジのモック一覧です。コース開始ページの「モック修了」で追加されます。
         </p>
       </header>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {[...MOCK_EARNED_BADGES, ...dynamicBadges].map((b) => (
           <div
             key={b.id}
-            className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:border-indigo-200 hover:shadow-lg"
           >
             <div
-              className={`relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl ${
-                b.imageSrc ? "bg-slate-50 ring-1 ring-slate-100" : "rounded-full bg-amber-100"
-              }`}
-            >
-              {b.imageSrc ? (
-                <Image
-                  src={b.imageSrc}
-                  alt=""
-                  width={56}
-                  height={56}
-                  className="object-contain p-1"
-                />
-              ) : (
-                <Award className="h-6 w-6 text-amber-700" />
-              )}
+              className="h-1 w-full"
+              style={{ background: `linear-gradient(90deg, ${b.accentColor}, ${b.accentColor}99)` }}
+            />
+            <div className="flex flex-col items-center border-b border-slate-100 bg-gradient-to-b from-slate-50/90 to-white px-5 pb-5 pt-6">
+              <OpenBadgeImage imageSrc={b.imageSrc} size="card" />
+              <h2
+                className="mt-4 text-center text-lg font-bold tracking-tight"
+                style={{ color: b.accentColor }}
+              >
+                {b.name}
+              </h2>
             </div>
-            <div>
-              <p className="font-semibold text-slate-900">{b.name}</p>
-              <p className="mt-1 text-xs text-slate-500">取得: {b.at}</p>
+            <div className="flex items-center justify-center gap-2 px-5 py-4">
+              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                <Award className="mr-1 h-3 w-3" />
+                取得 {b.at}
+              </span>
             </div>
           </div>
         ))}

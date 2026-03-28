@@ -5,7 +5,9 @@ import Image from "next/image";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MOCK_BADGES } from "@/lib/mockData";
 import type { Badge } from "@/lib/mockData";
-import { Plus, Pencil, X, Award, ImageIcon } from "lucide-react";
+import { PRESET_BADGE_IMAGES } from "@/lib/badgePresets";
+import { OpenBadgeImage } from "@/components/badges/OpenBadgeImage";
+import { Plus, Pencil, X, Award } from "lucide-react";
 
 const PRESET_COLORS = [
   { value: "#6366f1", label: "インディゴ" },
@@ -16,53 +18,6 @@ const PRESET_COLORS = [
   { value: "#ec4899", label: "ピンク" },
   { value: "#ef4444", label: "ローズ" },
 ];
-
-/** 生成済みオープンバッジ画像（public/badges） */
-const PRESET_BADGE_IMAGES: { src: string; label: string }[] = [
-  { src: "/badges/badge-1-chatgpt-master.png", label: "AI・対話スキル" },
-  { src: "/badges/badge-2-google-ai-explorer.png", label: "AI 探索パス" },
-  { src: "/badges/badge-3-data-science-intro.png", label: "データ初級" },
-  { src: "/badges/badge-4-javascript-dev.png", label: "JavaScript" },
-  { src: "/badges/badge-5-dx-leader.png", label: "DX リーダー" },
-];
-
-function BadgeArt({
-  imageSrc,
-  size = "card",
-  className = "",
-}: {
-  imageSrc?: string;
-  size?: "card" | "thumb" | "modal";
-  className?: string;
-}) {
-  const px = size === "card" ? 128 : size === "modal" ? 96 : 48;
-  const wrap = size === "card" ? "h-32 w-32 p-2" : size === "modal" ? "h-28 w-28 p-2" : "h-12 w-12 p-1";
-
-  if (imageSrc) {
-    return (
-      <div
-        className={`relative flex shrink-0 items-center justify-center rounded-2xl bg-slate-50/90 ring-1 ring-slate-200/90 shadow-inner ${wrap} ${className}`}
-      >
-        <Image
-          src={imageSrc}
-          alt=""
-          width={px}
-          height={px}
-          className="object-contain"
-          priority={size === "card"}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`flex shrink-0 items-center justify-center rounded-2xl bg-slate-100 ring-1 ring-dashed ring-slate-300 ${wrap} ${className}`}
-    >
-      <ImageIcon className={size === "thumb" ? "h-5 w-5 text-slate-400" : "h-10 w-10 text-slate-400"} />
-    </div>
-  );
-}
 
 export default function BadgesPage() {
   const [badges, setBadges] = useState<Badge[]>(MOCK_BADGES);
@@ -156,7 +111,7 @@ export default function BadgesPage() {
             />
 
             <div className="flex flex-col items-center border-b border-slate-100 bg-gradient-to-b from-slate-50/90 to-white px-5 pb-5 pt-6">
-              <BadgeArt imageSrc={badge.imageSrc} size="card" />
+              <OpenBadgeImage imageSrc={badge.imageSrc} size="card" />
               <h3
                 className="mt-4 text-center text-lg font-bold tracking-tight"
                 style={{ color: badge.color }}
@@ -221,7 +176,7 @@ export default function BadgesPage() {
                   プレビュー
                 </p>
                 <div className="mt-3 flex justify-center">
-                  <BadgeArt imageSrc={form.imageSrc} size="modal" />
+                  <OpenBadgeImage imageSrc={form.imageSrc} size="modal" />
                 </div>
               </div>
 
