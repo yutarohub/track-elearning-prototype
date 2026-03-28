@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 export default function LearnerWorkspacePage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/learner/home");
+    router.replace("/learner/skill-hub/home");
   }, [router]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">

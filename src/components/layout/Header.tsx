@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Bell,
   Settings,
@@ -9,8 +11,6 @@ import {
   LogOut,
   Wrench,
   ExternalLink,
-  GraduationCap,
-  LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -22,10 +22,19 @@ function headerDisplayName(view: "admin" | "learner", email: string | undefined)
   return "Track 管理";
 }
 
+function learnerProductLabel(pathname: string | null): string | null {
+  if (!pathname?.startsWith("/learner")) return null;
+  if (pathname.startsWith("/learner/skill-hub")) return "Skill Hub";
+  if (pathname.startsWith("/learner/track")) return "Track e-learning";
+  return null;
+}
+
 export function Header() {
   const { view, setView, user, logout } = useAuth();
+  const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const productLabel = view === "learner" ? learnerProductLabel(pathname) : null;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -42,38 +51,37 @@ export function Header() {
       className="fixed left-64 right-0 top-0 z-10 h-16 border-b border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-xl"
       role="banner"
     >
-      <div className="flex h-full items-center justify-between px-6">
+      <div className="flex h-full items-center justify-between gap-4 px-6">
         <div className="min-w-0 flex-1">
-          {view === "admin" ? (
-            <button
-              type="button"
-              onClick={() => setView("learner")}
-              className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50/90 px-3 py-1.5 text-sm font-medium text-indigo-900 shadow-sm transition hover:bg-indigo-100"
-            >
-              <GraduationCap className="h-4 w-4 shrink-0 text-indigo-600" aria-hidden />
-              受講者ビューへ
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setView("admin")}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50"
-            >
-              <LayoutDashboard className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />
-              管理者ビューへ
-            </button>
+          {productLabel && (
+            <p className="truncate text-xs font-medium text-slate-500">
+              <span className="text-slate-800">{productLabel}</span>
+              <span className="text-slate-400"> · 同一アカウントで行き来できます</span>
+            </p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            aria-label="通知（開発中）"
-            className="relative flex items-center gap-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="text-slate-600" aria-hidden>🚧</span>
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500" />
-          </button>
+          {view === "learner" ? (
+            <Link
+              href="/learner/track/notifications"
+              aria-label="通知一覧へ"
+              className="relative flex items-center gap-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              aria-label="通知（管理者ビューは準備中）"
+              className="relative flex items-center gap-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="text-slate-600" aria-hidden>
+                🚧
+              </span>
+            </button>
+          )}
           <button
             type="button"
             aria-label="設定（開発中）"

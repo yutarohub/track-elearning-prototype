@@ -16,8 +16,8 @@ import {
   FileCode,
   FolderOpen,
   GraduationCap,
-  MapPin,
   X,
+  Info,
 } from "lucide-react";
 import { CourseCreateWizard } from "@/components/CourseCreateWizard";
 import type { CourseWizardResult } from "@/components/CourseCreateWizard";
@@ -227,6 +227,23 @@ export default function LibraryPage() {
         {/* Main */}
         <div className="min-w-0 flex-1 p-6">
           <h1 className="text-2xl font-bold text-slate-900">ライブラリ</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            <span className="font-medium text-slate-800">Track Content Manager（TCM）</span>
+            でブック・アプリ・スライド等の本体を作成・編集し、この画面で公開先に紐づけます。
+          </p>
+          <div
+            className="mt-3 flex gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-950"
+            role="note"
+          >
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" aria-hidden />
+            <div>
+              <p className="font-semibold text-indigo-900">TCM 連携（プロトタイプ）</p>
+              <p className="mt-1 text-indigo-900/90">
+                動画・ファイルはこの画面からアップロード。それ以外のマテリアル種別は「TCMで作成・編集」から
+                Track Content Manager へジャンプする想定です。
+              </p>
+            </div>
+          </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div className="relative min-w-[200px] flex-1">

@@ -13,28 +13,25 @@ import {
   ChevronDown,
   HeadphonesIcon,
   Star,
-  GraduationCap,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 
 const navLearning = [
   { label: "ダッシュボード", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "eラーニング公開管理", href: "/admin/publish", icon: Send },
-  { label: "申請管理", href: "#", icon: FileText },
+  { label: "申請管理", href: "/admin/applications", icon: FileText },
 ];
 
 const navTenant = [
-  { label: "メンバー", href: "#", icon: Users },
-  { label: "契約", href: "#", icon: FileText },
+  { label: "メンバー", href: "/admin/members", icon: Users },
+  { label: "契約", href: "/admin/contracts", icon: FileText },
   { label: "ライブラリ", href: "/admin/library", icon: Library },
   { label: "バッジ管理", href: "/admin/badges", icon: Award },
   { label: "コースレイティング", href: "/admin/course-ratings", icon: Star },
-  { label: "AIアシスタント", href: "#", icon: Sparkles },
+  { label: "AIアシスタント", href: "/admin/ai-assistant", icon: Sparkles },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { setView } = useAuth();
 
   return (
     <aside
@@ -138,17 +135,6 @@ export function Sidebar() {
       </nav>
 
       <div className="absolute bottom-0 left-0 right-0 space-y-2 border-t border-white/[0.06] bg-[#0f1629] p-3">
-        <button
-          type="button"
-          onClick={() => setView("learner")}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-3 py-2.5 text-sm font-medium text-white shadow-md transition hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-[#0f1629]"
-        >
-          <GraduationCap className="h-5 w-5 shrink-0" aria-hidden />
-          受講者ビューへ（学習する）
-        </button>
-        <p className="px-1 text-center text-[10px] leading-snug text-white/45">
-          Skill Hub と同じアカウントのまま切り替え（プロトタイプ）
-        </p>
         <button
           type="button"
           aria-label="サポートへ問い合わせ（開発中）"

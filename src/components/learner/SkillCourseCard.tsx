@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Heart, Star, Video, Radio } from "lucide-react";
 import type {
   TraineeCourse,
@@ -91,18 +92,28 @@ function livePrimaryCta(status: LiveEnrollmentStatus | undefined): {
   };
 }
 
+function primaryCtaLabel(course: TraineeCourse, isLive: boolean, liveLabel: string): string {
+  if (isLive) return liveLabel;
+  if (course.paid && course.paidSelfFlowStatus === "pending_approval") return "承認待ち（申請済み）";
+  if (course.paid && course.paidSelfFlowStatus === "none") return "有償コースを申請";
+  return "今すぐ学習を開始";
+}
+
 export function SkillCourseCard({
   course,
   searchTokens,
   favorite,
   onToggleFavorite,
   onPrimaryAction,
+  primaryHref,
 }: {
   course: TraineeCourse;
   searchTokens: string[];
   favorite: boolean;
   onToggleFavorite: () => void;
   onPrimaryAction: (course: TraineeCourse) => void;
+  /** 設定時は受講前ページへ遷移（サンプルコース用） */
+  primaryHref?: string;
 }) {
   const thumb = courseThumbnailUrl(course);
   const isLive = course.delivery === "live";
@@ -262,15 +273,44 @@ export function SkillCourseCard({
         </div>
 
         <div className="mt-auto pt-4">
-          <button
-            type="button"
-            onClick={() => onPrimaryAction(course)}
-            className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white shadow-sm transition ${
-              isLive ? liveCta.className : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-          >
-            {isLive ? liveCta.label : "今すぐ学習を開始"}
-          </button>
+          {!isLive && course.paid && course.paidSelfFlowStatus === "pending_approval" && (
+            <p className="mb-2 text-center text-[11px] font-medium text-amber-800">
+              申請済み · 管理者の承認待ち
+            </p>
+          )}
+          {primaryHref ? (
+            <Link
+              href={primaryHref}
+              className={`flex w-full items-center justify-center rounded-lg py-2.5 text-center text-sm font-semibold text-white shadow-sm transition ${
+                isLive
+                  ? liveCta.className
+                  : course.paid && course.paidSelfFlowStatus === "pending_approval"
+                    ? "bg-amber-500 hover:bg-amber-600"
+                    : course.paid && course.paidSelfFlowStatus === "none"
+                      ? "bg-violet-600 hover:bg-violet-700"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+              }`}
+            >
+              {primaryCtaLabel(course, isLive, liveCta.label)}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled={!isLive && course.paid && course.paidSelfFlowStatus === "pending_approval"}
+              onClick={() => onPrimaryAction(course)}
+              className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                isLive
+                  ? liveCta.className
+                  : course.paid && course.paidSelfFlowStatus === "pending_approval"
+                    ? "bg-amber-500"
+                    : course.paid && course.paidSelfFlowStatus === "none"
+                      ? "bg-violet-600 hover:bg-violet-700"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+              }`}
+            >
+              {primaryCtaLabel(course, isLive, liveCta.label)}
+            </button>
+          )}
         </div>
       </div>
     </article>

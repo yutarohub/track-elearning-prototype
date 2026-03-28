@@ -1,11 +1,15 @@
 /**
- * 受講者スキルコースカタログ（/learner/skills/courses）用の検索・フィルタ・ハイライト
+ * 受講者コースカタログ（/learner/track/courses）用の検索・フィルタ・ハイライト
  */
 
 import type { TraineeCourse, TraineeDifficulty } from "@/lib/traineeCoursesMock";
+import { GAP_CATALOG_TAG_HINTS } from "@/lib/learnerSkillsMock";
 
 export type DeliveryFilterMode = "on_demand" | "live";
 export type DurationBucket = "short" | "medium" | "long";
+
+/** ギャップ／レコメンドなど外部画面からの連動（DEV-L08） */
+export type CatalogContextMode = "all" | "from_gap" | "from_recommend";
 
 export interface CatalogFilters {
   searchRaw: string;
@@ -16,6 +20,7 @@ export interface CatalogFilters {
   pricePaid: boolean;
   priceFree: boolean;
   durationBucket: DurationBucket | null;
+  catalogContextMode: CatalogContextMode;
 }
 
 export const DEFAULT_CATALOG_FILTERS: CatalogFilters = {
@@ -27,6 +32,7 @@ export const DEFAULT_CATALOG_FILTERS: CatalogFilters = {
   pricePaid: true,
   priceFree: true,
   durationBucket: null,
+  catalogContextMode: "all",
 };
 
 /** 検索用にトークン化（空白区切り・重複除去・小文字） */
@@ -106,6 +112,13 @@ export function filterCourses(courses: TraineeCourse[], f: CatalogFilters): Trai
       (isPaid && f.pricePaid) || (!isPaid && f.priceFree);
     if (!priceOk) return false;
     if (!durationMatchesBucket(c.durationMinutes, f.durationBucket)) return false;
+    if (f.catalogContextMode === "from_recommend" && !c.recommended) return false;
+    if (f.catalogContextMode === "from_gap") {
+      const matchesGapHint = GAP_CATALOG_TAG_HINTS.some(
+        (tag) => c.tags.includes(tag) || c.category.includes(tag) || (c.title + (c.subtitle ?? "")).includes(tag),
+      );
+      if (!matchesGapHint) return false;
+    }
     return true;
   });
 }
@@ -168,7 +181,8 @@ export function isFiltersDefault(f: CatalogFilters): boolean {
     f.difficulties.length === 0 &&
     f.pricePaid &&
     f.priceFree &&
-    f.durationBucket === null
+    f.durationBucket === null &&
+    f.catalogContextMode === "all"
   );
 }
 

@@ -11,6 +11,9 @@ export type DssQuadrant = "why" | "what" | "how" | "mindset";
 export type LiveEnrollmentStatus = "open" | "waitlist" | "next_session";
 export type SelfPublishStatus = "published" | "coming_soon";
 
+/** 有償オンデマンドの申請〜受講フロー（モック） */
+export type PaidSelfFlowStatus = "none" | "pending_approval" | "approved";
+
 export interface TraineeCourse {
   id: number;
   title: string;
@@ -47,6 +50,8 @@ export interface TraineeCourse {
   liveEnrollmentStatus?: LiveEnrollmentStatus;
   /** ライブ: プログラム期間表示 */
   liveProgramPeriod?: string;
+  /** 自学習かつ有償: 申請・承認状態 */
+  paidSelfFlowStatus?: PaidSelfFlowStatus;
 }
 
 /** サムネイルなし時用のプレースホルダー（グラデーション＋イニシャル） */
@@ -72,6 +77,7 @@ type RawTraineeCourse = Omit<
   | "liveSeatsLeft"
   | "liveEnrollmentStatus"
   | "liveProgramPeriod"
+  | "paidSelfFlowStatus"
 >;
 
 const RAW_TRAINEE_COURSES: RawTraineeCourse[] = [
@@ -171,6 +177,7 @@ const RAW_TRAINEE_COURSES: RawTraineeCourse[] = [
     duration: "14時間",
     delivery: "self",
     recommended: false,
+    paid: true,
     tags: ["データ", "AI"],
     dssQuadrant: "what",
     dssLabel: "データ分析",
@@ -299,6 +306,7 @@ const RAW_TRAINEE_COURSES: RawTraineeCourse[] = [
     duration: "6時間30分",
     delivery: "self",
     recommended: false,
+    paid: true,
     tags: ["クラウド", "AWS"],
     dssQuadrant: "what",
     dssLabel: "クラウド",
@@ -428,10 +436,26 @@ function enrichCourse(raw: RawTraineeCourse): TraineeCourse {
     base.liveProgramPeriod = "2026/03/01 〜 2026/03/31";
   }
 
+  if (raw.delivery === "self" && raw.paid) {
+    if (id === 7) base.paidSelfFlowStatus = "pending_approval";
+    else if (id === 16) base.paidSelfFlowStatus = "none";
+    else base.paidSelfFlowStatus = "approved";
+  }
+
   return base;
 }
 
 export const MOCK_TRAINEE_COURSES: TraineeCourse[] = RAW_TRAINEE_COURSES.map(enrichCourse);
+
+/**
+ * コース開始（受講前）専用ページを出すサンプル（プロトタイプ）
+ * 3: 無償自学習 / 7: 有償（承認待ちモック） / 1: ライブ（有償）
+ */
+export const SAMPLE_COURSE_START_IDS = new Set<number>([3, 7, 1]);
+
+export function hasSampleCourseStartPage(courseId: number): boolean {
+  return SAMPLE_COURSE_START_IDS.has(courseId);
+}
 
 /** タグフィルター用（運用ラベルは除外してもよいが、仕様上は全タグから選択可能にする） */
 export const ALL_TRAINEE_COURSE_TAGS: string[] = Array.from(

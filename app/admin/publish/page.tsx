@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Plus, Upload, X, Search, ChevronDown, ImageIcon, Pencil, Settings } from "lucide-react";
 import { CourseCreateWizard } from "@/components/CourseCreateWizard";
@@ -192,6 +193,17 @@ export default function PublishPage() {
               <span>設定</span>
             </button>
           </div>
+          <p className="mt-3 max-w-3xl text-sm text-slate-600">
+            Miro の理想フローに合わせた進行イメージ:{" "}
+            <span className="font-semibold text-slate-800">① マテリアル選定</span>
+            （
+            <Link href="/admin/library" className="text-indigo-600 underline-offset-2 hover:underline">
+              ライブラリ
+            </Link>
+            ）→ <span className="font-semibold text-slate-800">② コース情報</span>（作成ウィザード・メタデータ）→{" "}
+            <span className="font-semibold text-slate-800">③ 公開</span>
+            （ステータス・対象者）。プロトタイプではウィザードと一覧で再現しています。
+          </p>
 
           {/* タブ: Trackコース公開 / 外部LMS取り込み / 他社Track環境取り込み */}
           <div className="mt-4 inline-flex flex-wrap gap-1 rounded-full border border-slate-200 bg-slate-50 p-1 text-xs font-medium text-slate-600">

@@ -22,11 +22,24 @@ import {
   MOCK_COURSE_STACK,
   type AIInsightItem,
 } from "@/lib/dashboardMock";
+import { MOCK_LEARNING_HEALTH_KPIS } from "@/lib/adminPhase2Mock";
 import { MOCK_COURSES } from "@/lib/mockData";
 import type { Course, CourseType, Difficulty } from "@/lib/mockData";
 import { ProgressIndicator } from "@/components/dashboard/ProgressIndicator";
 import { FLAT_DEPARTMENTS, getDepartmentById, getDepartmentScale } from "@/lib/orgMock";
-import { X, TrendingUp, Clock, Award, AlertCircle, Sparkles, Search, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import {
+  X,
+  TrendingUp,
+  Clock,
+  Award,
+  AlertCircle,
+  Sparkles,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Activity,
+} from "lucide-react";
 
 const INSIGHT_ICONS: Record<AIInsightItem["type"], React.ComponentType<{ className?: string }>> = {
   trend: TrendingUp,
@@ -213,6 +226,37 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Miro 準拠: 学習ヘルス / 学習状況 / MAU クイックKPI */}
+        <section aria-label="学習KPIサマリー">
+          <div className="mb-2 flex items-center gap-2 text-slate-700">
+            <Activity className="h-5 w-5 text-indigo-600" />
+            <h2 className="text-sm font-semibold text-slate-900">経営・学習サマリー（モック）</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {MOCK_LEARNING_HEALTH_KPIS.map((k) => (
+              <div
+                key={k.label}
+                className={`rounded-xl border bg-white p-5 shadow-sm ${
+                  k.accent === "emerald"
+                    ? "border-emerald-100"
+                    : k.accent === "sky"
+                      ? "border-sky-100"
+                      : "border-violet-100"
+                }`}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  {k.label}
+                </p>
+                <p className="mt-2 text-2xl font-bold text-slate-900">{k.value}</p>
+                <p className="mt-1 text-xs text-slate-600">{k.sub}</p>
+                {k.trend ? (
+                  <p className="mt-2 text-xs font-medium text-indigo-600">{k.trend}</p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Zone 1: AI インサイト（リッチ） & Dual MAU */}
         <section className="space-y-6">
