@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { MOCK_BADGES } from "@/lib/mockData";
 import type { Badge } from "@/lib/mockData";
 import { PRESET_BADGE_IMAGES } from "@/lib/badgePresets";
+import { BadgeCard } from "@/components/badges/BadgeCard";
 import { OpenBadgeImage } from "@/components/badges/OpenBadgeImage";
 import { Plus, Pencil, X, Award } from "lucide-react";
 
@@ -99,52 +100,44 @@ export default function BadgesPage() {
         </button>
       </div>
 
-      <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {badges.map((badge) => (
-          <div
-            key={badge.id}
-            className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:border-indigo-200 hover:shadow-lg"
-          >
-            <div
-              className="h-1 w-full"
-              style={{ background: `linear-gradient(90deg, ${badge.color}, ${badge.color}99)` }}
-            />
-
-            <div className="flex flex-col items-center border-b border-slate-100 bg-gradient-to-b from-slate-50/90 to-white px-5 pb-5 pt-6">
-              <OpenBadgeImage imageSrc={badge.imageSrc} size="card" />
-              <h3
-                className="mt-4 text-center text-lg font-bold tracking-tight"
-                style={{ color: badge.color }}
-              >
-                {badge.name}
-              </h3>
-            </div>
-
-            <div className="p-5">
-              <p className="line-clamp-3 text-center text-sm text-slate-600">{badge.description}</p>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                  <Award className="mr-1 h-3 w-3" />
-                  発行 {badge.issued}
-                </span>
-                <span className="text-xs text-slate-400">コース {badge.courseIds.length} 件</span>
-                {badge.expires != null && (
-                  <span className="text-xs text-amber-600">有効期限 {badge.expires}</span>
-                )}
-              </div>
-
-              <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => openEdit(badge)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          <BadgeCard key={badge.id} accentColor={badge.color} className="aspect-square">
+            <div className="flex min-h-0 flex-1 flex-col p-2">
+              <div className="flex min-h-0 flex-1 flex-col items-center gap-1">
+                <OpenBadgeImage imageSrc={badge.imageSrc} size="grid" />
+                <h3
+                  className="line-clamp-2 w-full text-center text-xs font-bold leading-snug sm:text-sm"
+                  style={{ color: badge.color }}
                 >
-                  <Pencil className="h-4 w-4" />
-                  編集
-                </button>
+                  {badge.name}
+                </h3>
+                <p className="line-clamp-2 w-full text-center text-[10px] leading-snug text-slate-600 sm:text-[11px]">
+                  {badge.description}
+                </p>
+                <div className="mt-auto flex w-full flex-col gap-1.5 pt-1">
+                  <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 text-[9px] text-slate-500 sm:text-[10px]">
+                    <span className="inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 font-medium text-slate-700">
+                      <Award className="mr-0.5 h-2.5 w-2.5" />
+                      発行 {badge.issued}
+                    </span>
+                    <span className="text-slate-400">コース {badge.courseIds.length}</span>
+                    {badge.expires != null && (
+                      <span className="text-amber-600">期限 {badge.expires}</span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => openEdit(badge)}
+                    className="flex w-full items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-50 sm:text-xs"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    編集
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </BadgeCard>
         ))}
       </div>
 
