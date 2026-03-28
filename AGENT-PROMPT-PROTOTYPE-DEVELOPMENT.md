@@ -11,10 +11,11 @@
 
 ## 必須参照ドキュメント
 
-- **sytem-documentions/00-REBUILD-SPECIFICATION.md** を最初に読み、ドキュメント一覧・フォルダ構成・ルート一覧・起動方法・再構築の推奨順序を把握すること。
-- その後、**01 → 02 → 03 → 05 → 04** の順で sytem-documentions 内の各仕様書に従い実装すること。
-- **sytem-documentions/Track e-learning Admin Dashboard UI.md** で管理画面のコンポーネントツリーとスタイル指示を確認すること。
-- **sytem-documentions/Track e-learning Self-Learning Workspace UI Prototype.md** は受講者ワークスペースのUX要件（現状は Coming Soon でよい）。
+- リポジトリルートの **エージェントルール.md** でパス規約・受講者ルートを確認すること。
+- **docs/spec/00-REBUILD-SPECIFICATION.md** を最初に読み、ドキュメント一覧・フォルダ構成・ルート一覧・起動方法・再構築の推奨順序を把握すること。
+- その後、**01 → 02 → 03 → 05 → 04** の順で `docs/spec/` 内の各仕様書に従い実装すること。
+- **docs/spec/Track e-learning Admin Dashboard UI.md** で管理画面のコンポーネントツリーとスタイル指示を確認すること。
+- **docs/spec/Track e-learning Self-Learning Workspace UI Prototype.md** は受講者ワークスペースのUX要件。現行実装は `/learner/skill-hub/*` と `/learner/track/*` に分割済み（00 のルート表参照）。
 
 ## 技術スタック
 
@@ -33,7 +34,8 @@
    - /admin/publish（ワンストップボタン・公開済み一覧・3ステップウィザードモーダル）
    - /admin/library（マテリアル一覧・検索・種別フィルタ）
    - /admin/badges（バッジ一覧）
-   - /learner/workspace（Coming Soon プレースホルダー・管理者に戻るボタン）
+   - /learner/workspace（必要に応じてリダイレクト）
+   - 受講者の主導線: `/learner/skill-hub/*`（分析・診断）と `/learner/track/*`（学習・バッジ・通知）。詳細は docs/spec/00-REBUILD-SPECIFICATION.md のルート表。
 
 ## スタイル・UX
 
@@ -56,11 +58,11 @@
 
 ## 使い方
 
-1. このフォルダ（`Track-eleanring -prototype`）を Cursor などでワークスペースとして開く。
+1. 本リポジトリ（`track-elearning-prototype`）を Cursor などでワークスペースとして開く。
 2. 上記の「指示プロンプト」ブロック全体をコピーする。
 3. エージェント（Chat / Agent）に貼り付けて実行する。
-4. 必要に応じて「sytem-documentions の 00 から順に読んで実装して」とだけ伝え、この AGENT-PROMPT-PROTOTYPE-DEVELOPMENT.md を参照させることもできます。
+4. 必要に応じて「docs/spec の 00 から順に読んで実装して」とだけ伝え、この AGENT-PROMPT-PROTOTYPE-DEVELOPMENT.md を参照させることもできます。
 
 ## 注意
 
-- 元のプロジェクトに `ui-screenshots` が存在しなかったため、本フォルダでは空の ui-screenshots と README のみ配置しています。参考にしたい画面キャプチャがある場合は、ui-screenshots に画像を追加してください。
+- 参考画像・動画は `ui-screenshots/`（README 参照）。エージェントは必要に応じて参照して UI を近づける。

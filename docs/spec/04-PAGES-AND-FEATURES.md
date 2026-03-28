@@ -76,3 +76,15 @@
 - 各 admin ページは `<AppLayout>{ ... }</AppLayout>` でラップする。
 - ローディング: src/app/loading.tsx と src/app/admin/loading.tsx で任意のローディング UIを出せる。
 - スタイル: 03 のスタイル方針に合わせ、Tailwind で統一。角丸・シャドウ・バッジ色は既存 Admin Dashboard UI 仕様と揃えるとよい。
+
+---
+
+## 9. 受講者（Skill Hub / Track）— 現行ルート概要（2026-03）
+
+詳細は **00-REBUILD-SPECIFICATION.md のルート一覧** を正とする。概要のみ:
+
+- **Skill Hub**（`app/learner/skill-hub/layout.tsx`）: `home`, `owned`, `gap`, `gap/[code]`, `timeline`, `diagnostics/survey`, `diagnostics/exam`。サイドバーから Track コース一覧へ導線あり。
+- **Track e-learning**（`app/learner/track/layout.tsx`）: `courses`, `courses/browse`, `courses/[id]/start`（サンプル ID のみ）, `paths`, `history`, `learning-path`, `recommendations`, `badges`, `notifications` 等。
+- 旧 `/learner/home`, `/learner/skills/*` は `next.config` の redirects で新 URL へ誘導。
+
+04 の上記セクション 7（`/learner/workspace` のみ記載）は初期プロトタイプの記述のまま残す。受講者の主導線は本セクションと 00 を参照すること。

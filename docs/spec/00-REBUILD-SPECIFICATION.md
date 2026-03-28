@@ -69,7 +69,14 @@
 │   └── lib/
 │       └── mockData.ts         # MOCK_COURSES, MOCK_BADGES, MOCK_MATERIALS
 ├── public/                     # 静的ファイル（任意）
-└── sytem-documentions/         # 本仕様書群
+├── docs/                       # 仕様・進捗・調査（本リポジトリの正規ドキュメント）
+│   ├── DEVELOPMENT-PROGRESS.md
+│   ├── README.md
+│   ├── spec/                   # 00〜05 + Track UI 補足 .md
+│   └── research/               # 経営・LXP 等の調査メモ
+├── ui-screenshots/             # 参考画像・動画
+├── エージェントルール.md        # AI 向け運用ルール
+└── AGENTS.md                   # エージェント短いエントリ
 ```
 
 - **パスエイリアス:** `@/*` → `./src/*`（tsconfig.json の paths）。
@@ -77,6 +84,8 @@
 ---
 
 ## 4. ルート一覧
+
+### 4.1 共通・管理
 
 | パス | 説明 | 認証 |
 |------|------|------|
@@ -87,7 +96,21 @@
 | `/admin/publish` | eラーニング公開管理（ワンストップ公開） | 要 |
 | `/admin/library` | ライブラリ（マテリアル一覧） | 要 |
 | `/admin/badges` | バッジ一覧 | 要 |
-| `/learner/workspace` | 受講者ワークスペース（Coming Soon） | 要 |
+| `/admin/*` | 申請・メンバー・契約・AI アシスタント等（プロトタイプ拡張） | 要 |
+
+### 4.2 受講者（Skill Hub / Track 分離・現行）
+
+| パス | 説明 | 認証 |
+|------|------|------|
+| `/learner` | `/learner/skill-hub/home` へリダイレクト想定 | 要 |
+| `/learner/skill-hub/home` | Skill Hub ホーム | 要 |
+| `/learner/skill-hub/owned` 等 | 保有スキル・ギャップ・タイムライン・診断 | 要 |
+| `/learner/track/courses` | Track コース一覧 | 要 |
+| `/learner/track/courses/[id]/start` | サンプルコースのみコース開始（受講前） | 要 |
+| `/learner/track/paths`, `history`, `badges`, `notifications` 等 | Track ナビ | 要 |
+| `/learner/workspace` | ワークスペース（リダイレクトまたはプレースホルダー） | 要 |
+
+旧パス `/learner/home`, `/learner/skills/*` は `next.config` の redirects で上記に誘導。
 
 ---
 

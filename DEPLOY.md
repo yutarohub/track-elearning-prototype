@@ -12,10 +12,10 @@ npx vercel login
 
 ## 2. プロジェクトフォルダでデプロイ
 
-このフォルダ（`Track-eleanring -prototype`）に移動してから実行します。
+クローンした本リポジトリのルートに移動してから実行します。
 
 ```bash
-cd "/Users/Yutaro_96/Documents/Antigravity/Track-eleanring -prototype"
+cd /path/to/track-elearning-prototype
 npx vercel --prod
 ```
 

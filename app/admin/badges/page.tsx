@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { MOCK_BADGES } from "@/lib/mockData";
 import type { Badge } from "@/lib/mockData";
-import { Plus, Pencil, X, Award } from "lucide-react";
+import { Plus, Pencil, X, Award, ImageIcon } from "lucide-react";
 
 const PRESET_COLORS = [
   { value: "#6366f1", label: "インディゴ" },
@@ -16,7 +17,52 @@ const PRESET_COLORS = [
   { value: "#ef4444", label: "ローズ" },
 ];
 
-const PRESET_ICONS = ["🏆", "🎯", "🤖", "⚡", "📊", "🔮", "🌟", "💎", "🚀", "🎓"];
+/** 生成済みオープンバッジ画像（public/badges） */
+const PRESET_BADGE_IMAGES: { src: string; label: string }[] = [
+  { src: "/badges/badge-1-chatgpt-master.png", label: "AI・対話スキル" },
+  { src: "/badges/badge-2-google-ai-explorer.png", label: "AI 探索パス" },
+  { src: "/badges/badge-3-data-science-intro.png", label: "データ初級" },
+  { src: "/badges/badge-4-javascript-dev.png", label: "JavaScript" },
+  { src: "/badges/badge-5-dx-leader.png", label: "DX リーダー" },
+];
+
+function BadgeArt({
+  imageSrc,
+  size = "card",
+  className = "",
+}: {
+  imageSrc?: string;
+  size?: "card" | "thumb" | "modal";
+  className?: string;
+}) {
+  const px = size === "card" ? 128 : size === "modal" ? 96 : 48;
+  const wrap = size === "card" ? "h-32 w-32 p-2" : size === "modal" ? "h-28 w-28 p-2" : "h-12 w-12 p-1";
+
+  if (imageSrc) {
+    return (
+      <div
+        className={`relative flex shrink-0 items-center justify-center rounded-2xl bg-slate-50/90 ring-1 ring-slate-200/90 shadow-inner ${wrap} ${className}`}
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          width={px}
+          height={px}
+          className="object-contain"
+          priority={size === "card"}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`flex shrink-0 items-center justify-center rounded-2xl bg-slate-100 ring-1 ring-dashed ring-slate-300 ${wrap} ${className}`}
+    >
+      <ImageIcon className={size === "thumb" ? "h-5 w-5 text-slate-400" : "h-10 w-10 text-slate-400"} />
+    </div>
+  );
+}
 
 export default function BadgesPage() {
   const [badges, setBadges] = useState<Badge[]>(MOCK_BADGES);
@@ -26,7 +72,8 @@ export default function BadgesPage() {
     name: "",
     description: "",
     color: "#6366f1",
-    icon: "🏆",
+    icon: "",
+    imageSrc: undefined,
     courseIds: [],
     issued: 0,
   });
@@ -36,7 +83,8 @@ export default function BadgesPage() {
       name: "",
       description: "",
       color: "#6366f1",
-      icon: "🏆",
+      icon: "",
+      imageSrc: PRESET_BADGE_IMAGES[0]?.src,
       courseIds: [],
       issued: 0,
     });
@@ -51,6 +99,7 @@ export default function BadgesPage() {
       description: badge.description,
       color: badge.color,
       icon: badge.icon,
+      imageSrc: badge.imageSrc,
       courseIds: badge.courseIds,
       issued: badge.issued,
       expires: badge.expires,
@@ -60,6 +109,9 @@ export default function BadgesPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.imageSrc?.trim()) {
+      return;
+    }
     if (modalOpen === "create") {
       const newId = Math.max(0, ...badges.map((b) => b.id)) + 1;
       setBadges((prev) => [...prev, { ...form, id: newId }]);
@@ -75,7 +127,13 @@ export default function BadgesPage() {
   return (
     <AppLayout>
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">バッジ管理</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">バッジ管理</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            オープンバッジ形式の画像を表示します（<code className="rounded bg-slate-100 px-1 text-xs">public/badges</code>
+            ）。
+          </p>
+        </div>
         <button
           type="button"
           onClick={openCreate}
@@ -92,50 +150,32 @@ export default function BadgesPage() {
             key={badge.id}
             className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:border-indigo-200 hover:shadow-lg"
           >
-            {/* Accent bar */}
             <div
               className="h-1 w-full"
               style={{ background: `linear-gradient(90deg, ${badge.color}, ${badge.color}99)` }}
             />
 
-            <div className="p-5">
-              <div className="flex items-start gap-4">
-                {/* Icon with ring */}
-                <div
-                  className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-inner ring-2 ring-white"
-                  style={{
-                    background: `linear-gradient(135deg, ${badge.color}30, ${badge.color}15)`,
-                    boxShadow: `0 0 0 2px ${badge.color}40, inset 0 1px 0 rgba(255,255,255,0.3)`,
-                  }}
-                >
-                  {badge.icon}
-                </div>
+            <div className="flex flex-col items-center border-b border-slate-100 bg-gradient-to-b from-slate-50/90 to-white px-5 pb-5 pt-6">
+              <BadgeArt imageSrc={badge.imageSrc} size="card" />
+              <h3
+                className="mt-4 text-center text-lg font-bold tracking-tight"
+                style={{ color: badge.color }}
+              >
+                {badge.name}
+              </h3>
+            </div>
 
-                <div className="min-w-0 flex-1">
-                  <h3
-                    className="font-bold tracking-tight text-slate-900"
-                    style={{ color: badge.color }}
-                  >
-                    {badge.name}
-                  </h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-600">
-                    {badge.description}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                      <Award className="mr-1 h-3 w-3" />
-                      発行 {badge.issued}
-                    </span>
-                    <span className="text-xs text-slate-400">
-                      コース {badge.courseIds.length} 件
-                    </span>
-                    {badge.expires != null && (
-                      <span className="text-xs text-amber-600">
-                        有効期限 {badge.expires}
-                      </span>
-                    )}
-                  </div>
-                </div>
+            <div className="p-5">
+              <p className="line-clamp-3 text-center text-sm text-slate-600">{badge.description}</p>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                  <Award className="mr-1 h-3 w-3" />
+                  発行 {badge.issued}
+                </span>
+                <span className="text-xs text-slate-400">コース {badge.courseIds.length} 件</span>
+                {badge.expires != null && (
+                  <span className="text-xs text-amber-600">有効期限 {badge.expires}</span>
+                )}
               </div>
 
               <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
@@ -153,7 +193,6 @@ export default function BadgesPage() {
         ))}
       </div>
 
-      {/* Create / Edit Modal */}
       {modalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -161,7 +200,7 @@ export default function BadgesPage() {
           aria-modal="true"
           aria-labelledby="badge-modal-title"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
               <h2 id="badge-modal-title" className="text-lg font-semibold text-slate-900">
                 {modalOpen === "create" ? "バッジを追加" : "バッジを編集"}
@@ -176,11 +215,53 @@ export default function BadgesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 p-6">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  プレビュー
+                </p>
+                <div className="mt-3 flex justify-center">
+                  <BadgeArt imageSrc={form.imageSrc} size="modal" />
+                </div>
+              </div>
+
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  バッジ名
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  バッジ画像
                 </label>
+                <p className="mb-2 text-xs text-slate-500">プリセットから選ぶか、下の欄にパスを直接入力します。</p>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                  {PRESET_BADGE_IMAGES.map((p) => (
+                    <button
+                      key={p.src}
+                      type="button"
+                      title={p.label}
+                      onClick={() => setForm((f) => ({ ...f, imageSrc: p.src }))}
+                      className={`relative flex aspect-square items-center justify-center rounded-xl border-2 bg-white p-1 transition hover:border-indigo-400 ${
+                        form.imageSrc === p.src ? "border-indigo-600 ring-2 ring-indigo-200" : "border-slate-200"
+                      }`}
+                    >
+                      <Image src={p.src} alt="" width={48} height={48} className="object-contain" />
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={form.imageSrc ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      imageSrc: e.target.value.trim() || undefined,
+                    }))
+                  }
+                  className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm text-slate-900"
+                  placeholder="/badges/badge-1-chatgpt-master.png"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">バッジ名</label>
                 <input
                   type="text"
                   value={form.name}
@@ -191,9 +272,7 @@ export default function BadgesPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  説明
-                </label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">説明</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -204,9 +283,7 @@ export default function BadgesPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  カラー
-                </label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">アクセントカラー</label>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map((c) => (
                     <button
@@ -229,40 +306,10 @@ export default function BadgesPage() {
                   placeholder="#6366f1"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  アイコン（絵文字）
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_ICONS.map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, icon }))}
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl transition ${
-                        form.icon === icon
-                          ? "ring-2 ring-indigo-500 bg-indigo-50"
-                          : "bg-slate-100 hover:bg-slate-200"
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={form.icon}
-                  onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value || "🏆" }))}
-                  className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-slate-900"
-                  placeholder="絵文字を入力"
-                  maxLength={2}
-                />
-              </div>
+
               {modalOpen === "edit" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    発行数
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">発行数</label>
                   <input
                     type="number"
                     min={0}
@@ -275,9 +322,7 @@ export default function BadgesPage() {
                 </div>
               )}
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  有効期限（任意）
-                </label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">有効期限（任意）</label>
                 <input
                   type="text"
                   value={form.expires ?? ""}

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Award } from "lucide-react";
 import { useLearnerProgress } from "@/context/LearnerProgressContext";
+import { getBadgeImageSrcForCourseId } from "@/lib/mockData";
 import { MOCK_TRAINEE_COURSES } from "@/lib/traineeCoursesMock";
 
-const MOCK_EARNED_BADGES = [
+const MOCK_EARNED_BADGES: { id: string; name: string; at: string; imageSrc?: string }[] = [
   { id: "b-onboarding", name: "オンボーディング完了", at: "2025-12-01" },
   { id: "b-security", name: "セキュリティ基礎", at: "2026-02-20" },
 ];
@@ -18,10 +20,13 @@ export default function TrackLearnerBadgesPage() {
     const title = Number.isFinite(courseId)
       ? MOCK_TRAINEE_COURSES.find((c) => c.id === courseId)?.title
       : undefined;
+    const imageSrc =
+      Number.isFinite(courseId) ? getBadgeImageSrcForCourseId(courseId) : undefined;
     return {
       id,
       name: title ? `修了: ${title}` : id.replace(/^badge-/, ""),
       at: "モック修了",
+      imageSrc,
     };
   });
 
@@ -40,8 +45,22 @@ export default function TrackLearnerBadgesPage() {
             key={b.id}
             className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100">
-              <Award className="h-6 w-6 text-amber-700" />
+            <div
+              className={`relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl ${
+                b.imageSrc ? "bg-slate-50 ring-1 ring-slate-100" : "rounded-full bg-amber-100"
+              }`}
+            >
+              {b.imageSrc ? (
+                <Image
+                  src={b.imageSrc}
+                  alt=""
+                  width={56}
+                  height={56}
+                  className="object-contain p-1"
+                />
+              ) : (
+                <Award className="h-6 w-6 text-amber-700" />
+              )}
             </div>
             <div>
               <p className="font-semibold text-slate-900">{b.name}</p>

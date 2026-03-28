@@ -29,6 +29,8 @@ export interface Badge {
   description: string;
   color: string;
   icon: string;
+  /** オープンバッジ風画像（`/public` 配下のパス、例 `/badges/badge-1-....png`） */
+  imageSrc?: string;
   courseIds: number[];
   issued: number;
   expires?: string;
@@ -336,6 +338,7 @@ export const MOCK_BADGES: Badge[] = [
     description: "ChatGPT基礎講座を修了した証明バッジ",
     color: "#6366f1",
     icon: "🤖",
+    imageSrc: "/badges/badge-1-chatgpt-master.png",
     courseIds: [3],
     issued: 4,
   },
@@ -345,6 +348,7 @@ export const MOCK_BADGES: Badge[] = [
     description: "Google AI 探索パスを修了した証明",
     color: "#8b5cf6",
     icon: "🔮",
+    imageSrc: "/badges/badge-2-google-ai-explorer.png",
     courseIds: [4],
     issued: 3,
   },
@@ -354,6 +358,7 @@ export const MOCK_BADGES: Badge[] = [
     description: "データサイエンス入門コース修了",
     color: "#0ea5e9",
     icon: "📊",
+    imageSrc: "/badges/badge-3-data-science-intro.png",
     courseIds: [5, 19],
     issued: 7,
   },
@@ -363,6 +368,7 @@ export const MOCK_BADGES: Badge[] = [
     description: "JavaScript モダン開発コース修了",
     color: "#eab308",
     icon: "⚡",
+    imageSrc: "/badges/badge-4-javascript-dev.png",
     courseIds: [6],
     issued: 10,
   },
@@ -372,11 +378,22 @@ export const MOCK_BADGES: Badge[] = [
     description: "DX推進リーダー養成パス修了",
     color: "#ec4899",
     icon: "🎯",
+    imageSrc: "/badges/badge-5-dx-leader.png",
     courseIds: [7],
     issued: 2,
     expires: "2025-12-31",
   },
 ];
+
+/** コース ID に紐づくバッジ画像（なければ undefined） */
+export function getBadgeImageSrcForCourseId(courseId: number): string | undefined {
+  return MOCK_BADGES.find((b) => b.courseIds.includes(courseId))?.imageSrc;
+}
+
+/** バッジ ID の画像 */
+export function getBadgeImageSrcByBadgeId(badgeId: number): string | undefined {
+  return MOCK_BADGES.find((b) => b.id === badgeId)?.imageSrc;
+}
 
 export const MOCK_MATERIALS: Material[] = [
   {
